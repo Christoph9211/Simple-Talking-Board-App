@@ -1,0 +1,22 @@
+apply plugin: "com.android.application"
+
+android {
+    namespace "com.simpletalkingboard.app"
+    compileSdk 35
+
+    defaultConfig {
+        applicationId "com.simpletalkingboard.app"
+        minSdk 23
+        targetSdk 35
+        versionCode 1
+        versionName "1.0"
+    }
+}
+
+tasks.register("copyBoardHtml", Copy) {
+    from rootProject.file("index.html")
+    into layout.buildDirectory.dir("generated/assets/main")
+}
+
+android.sourceSets.main.assets.srcDir(layout.buildDirectory.dir("generated/assets/main"))
+preBuild.dependsOn("copyBoardHtml")

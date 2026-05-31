@@ -677,6 +677,10 @@
       return Number.isFinite(parsed) ? parsed : 0.75;
     }
 
+    function nativeSpeechAvailable() {
+      return typeof window.AndroidSpeech !== "undefined";
+    }
+
     function voiceText(voice) {
       return `${voice.name || ""} ${voice.lang || ""} ${voice.voiceURI || ""}`.toLowerCase();
     }
@@ -730,6 +734,11 @@
       if (!status) return;
 
       if (!selectedVoice) {
+        if (nativeSpeechAvailable()) {
+          status.textContent = "Using Android tablet voice. Speech is handled by the installed app.";
+          return;
+        }
+
         status.textContent = "No English voice found yet. The browser will use its default voice.";
         return;
       }
@@ -739,6 +748,12 @@
     }
 
     function loadVoices() {
+      if (nativeSpeechAvailable()) {
+        selectedVoice = null;
+        updateVoiceStatus();
+        return;
+      }
+
       if (!("speechSynthesis" in window)) {
         const status = document.getElementById("voiceStatus");
         if (status) status.textContent = "Speech is not supported on this browser.";
@@ -766,7 +781,9 @@
       if (!text) return;
       lastPhrase = text;
 
-      if ("speechSynthesis" in window) {
+      if (nativeSpeechAvailable()) {
+        window.AndroidSpeech.speak(text, getSpeechRate());
+      } else if ("speechSynthesis" in window) {
         window.speechSynthesis.cancel();
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.rate = getSpeechRate();
@@ -853,7 +870,11 @@
       renderSelected("firstSelected", null, "Pick first");
       renderSelected("thenSelected", null, "Pick then");
       updateBoxHighlight();
-      if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+      if (nativeSpeechAvailable()) {
+        window.AndroidSpeech.stop();
+      } else if ("speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+      }
     }
 
     function updateBoxHighlight() {
@@ -950,6 +971,9 @@
 
       document.getElementById("rateSelect").addEventListener("change", () => {
         localStorage.setItem(STORAGE_KEYS.rate, document.getElementById("rateSelect").value);
+        if (nativeSpeechAvailable()) {
+          window.AndroidSpeech.setRate(getSpeechRate());
+        }
         speak("speech speed selected");
       });
 
