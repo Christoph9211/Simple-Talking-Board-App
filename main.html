@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#2f6fed" />
+  <title>Picture Communication Board</title>
+  <style>
+    :root {
+      --bg: #f7f7fb;
+      --card: #ffffff;
+      --text: #171717;
+      --muted: #61616b;
+      --border: #d9d9e3;
+      --primary: #2f6fed;
+      --primary-soft: #e8f0ff;
+      --green: #1f9d55;
+      --green-soft: #e9f8ee;
+      --red: #d93232;
+      --red-soft: #fff0f0;
+      --yellow-soft: #fff8df;
+      --purple-soft: #f2edff;
+      --shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overscroll-behavior: none;
+      touch-action: manipulation;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+    }
+
+    button,
+    select {
+      font: inherit;
+    }
+
+    header {
+      padding: 10px 14px 8px;
+      background: #fff;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .title-wrap {
+      min-width: 0;
+      padding-right: 52px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(20px, 3vw, 34px);
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+    }
+
+    .subtitle {
+      margin-top: 2px;
+      font-size: clamp(12px, 1.7vw, 16px);
+      color: var(--muted);
+    }
+
+    .small-btn,
+    .nav-btn,
+    .rate-select {
+      border: 2px solid var(--border);
+      background: #fff;
+      color: var(--text);
+      border-radius: 14px;
+      padding: 9px 12px;
+      font-weight: 800;
+      font-size: clamp(13px, 1.6vw, 16px);
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+
+    .rate-select {
+      max-width: 170px;
+      font-weight: 700;
+    }
+
+    .small-btn:active,
+    .nav-btn:active,
+    .tile:active,
+    .choice-card:active {
+      transform: scale(0.98);
+    }
+
+    .parent-hotspot {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 84px;
+      height: 76px;
+      border: 0;
+      background: transparent;
+      opacity: 0.01;
+      z-index: 50;
+      cursor: default;
+    }
+
+    .parent-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 100;
+    }
+
+    .parent-overlay.hidden {
+      display: none;
+    }
+
+    .parent-panel {
+      width: min(560px, 96vw);
+      max-height: 92vh;
+      overflow: auto;
+      background: #fff;
+      border: 3px solid var(--border);
+      border-radius: 28px;
+      padding: 18px;
+      box-shadow: 0 18px 60px rgba(0, 0, 0, 0.28);
+    }
+
+    .parent-panel h2 {
+      margin: 0 0 4px;
+      font-size: clamp(22px, 4vw, 34px);
+      letter-spacing: -0.03em;
+    }
+
+    .parent-panel p {
+      margin: 0 0 12px;
+      color: var(--muted);
+      font-weight: 650;
+      line-height: 1.35;
+    }
+
+    .settings-row {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      margin: 12px 0;
+    }
+
+    .settings-label {
+      font-weight: 900;
+      font-size: 16px;
+    }
+
+    .voice-status {
+      padding: 10px 12px;
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      background: var(--bg);
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 750;
+      line-height: 1.3;
+    }
+
+    .parent-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+
+    nav {
+      display: flex;
+      gap: 8px;
+      padding: 10px 14px;
+      background: #fff;
+      border-bottom: 1px solid var(--border);
+      overflow-x: auto;
+    }
+
+    .nav-btn.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+    }
+
+    main {
+      padding: 14px;
+      flex: 1;
+    }
+
+    .page {
+      display: none;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    .grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .main-grid {
+      grid-template-columns: repeat(4, minmax(120px, 1fr));
+    }
+
+    .routine-grid {
+      grid-template-columns: repeat(4, minmax(120px, 1fr));
+    }
+
+    .tile {
+      min-height: clamp(115px, 20vh, 175px);
+      border: 3px solid var(--border);
+      border-radius: 24px;
+      background: var(--card);
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      user-select: none;
+      padding: 10px;
+    }
+
+    .tile:focus-visible,
+    .small-btn:focus-visible,
+    .nav-btn:focus-visible,
+    .choice-card:focus-visible,
+    .rate-select:focus-visible,
+    .parent-hotspot:focus-visible {
+      outline: 5px solid rgba(47, 111, 237, 0.35);
+      outline-offset: 3px;
+    }
+
+    .icon {
+      width: clamp(48px, 8vw, 88px);
+      height: clamp(48px, 8vw, 88px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .icon svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .tile .label {
+      font-size: clamp(22px, 4vw, 42px);
+      font-weight: 950;
+      line-height: 1;
+      letter-spacing: -0.02em;
+      text-align: center;
+      text-transform: lowercase;
+    }
+
+    .tile .phrase {
+      font-size: clamp(12px, 1.8vw, 18px);
+      color: var(--muted);
+      text-align: center;
+      font-weight: 750;
+    }
+
+    .tile.stop,
+    .tile.no {
+      border-color: #ffb3b3;
+      background: var(--red-soft);
+    }
+
+    .tile.yes {
+      border-color: #a7e9b5;
+      background: var(--green-soft);
+    }
+
+    .tile.break {
+      border-color: #b7d4ff;
+      background: var(--primary-soft);
+    }
+
+    .tile.help {
+      border-color: #d4c6ff;
+      background: var(--purple-soft);
+    }
+
+    .first-then-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .first-then-box {
+      background: #fff;
+      border: 4px solid var(--border);
+      border-radius: 28px;
+      min-height: clamp(180px, 35vh, 300px);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      cursor: pointer;
+    }
+
+    .box-heading {
+      padding: 10px;
+      text-align: center;
+      font-size: clamp(30px, 5vw, 56px);
+      font-weight: 950;
+      border-bottom: 4px solid var(--border);
+    }
+
+    .first .box-heading {
+      background: #e7f0ff;
+    }
+
+    .then .box-heading {
+      background: #eef9e8;
+    }
+
+    .selected-card {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      gap: 8px;
+    }
+
+    .selected-card .icon {
+      width: clamp(60px, 10vw, 110px);
+      height: clamp(60px, 10vw, 110px);
+    }
+
+    .selected-card .label {
+      font-size: clamp(30px, 5vw, 58px);
+      font-weight: 950;
+      text-align: center;
+      text-transform: lowercase;
+    }
+
+    .placeholder {
+      color: #999;
+      font-weight: 850;
+      font-size: clamp(20px, 3vw, 36px);
+      text-align: center;
+    }
+
+    .choice-section {
+      background: #fff;
+      border: 2px solid var(--border);
+      border-radius: 24px;
+      padding: 12px;
+      box-shadow: var(--shadow);
+    }
+
+    .choice-section h2 {
+      margin: 0 0 10px;
+      font-size: clamp(18px, 2.5vw, 28px);
+    }
+
+    .choice-grid {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(80px, 1fr));
+      gap: 8px;
+    }
+
+    .choice-card {
+      border: 2px solid var(--border);
+      background: #fff;
+      border-radius: 16px;
+      min-height: 96px;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .choice-card .icon {
+      width: clamp(34px, 5vw, 52px);
+      height: clamp(34px, 5vw, 52px);
+    }
+
+    .choice-card .label {
+      font-size: clamp(14px, 2vw, 22px);
+      font-weight: 900;
+      text-transform: lowercase;
+      text-align: center;
+    }
+
+    .instructions {
+      margin-top: 12px;
+      background: #fff;
+      border: 2px solid var(--border);
+      border-radius: 20px;
+      padding: 12px;
+      font-size: clamp(15px, 2vw, 20px);
+      line-height: 1.35;
+    }
+
+    .instructions strong {
+      font-weight: 900;
+    }
+
+    @media (orientation: portrait) {
+      .main-grid,
+      .routine-grid {
+        grid-template-columns: repeat(3, minmax(100px, 1fr));
+      }
+
+      .choice-grid {
+        grid-template-columns: repeat(3, minmax(80px, 1fr));
+      }
+
+      .first-then-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 700px) {
+      header {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .main-grid,
+      .routine-grid {
+        grid-template-columns: repeat(2, minmax(100px, 1fr));
+      }
+    }
+
+    @media print {
+      header,
+      nav,
+      .instructions,
+      .parent-hotspot,
+      .parent-overlay {
+        display: none !important;
+      }
+
+      body,
+      main {
+        background: #fff;
+        padding: 0;
+      }
+
+      .page {
+        display: block !important;
+        page-break-after: always;
+        padding: 12px;
+      }
+
+      .tile,
+      .first-then-box,
+      .choice-section {
+        box-shadow: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="title-wrap">
+      <h1>Picture Communication Board</h1>
+      <div class="subtitle">Tap a picture to speak. Big buttons, clear words, single-file HTML.</div>
+    </div>
+    <button class="parent-hotspot" id="parentHotspot" type="button" aria-label="Parent menu. Press and hold."></button>
+  </header>
+
+  <nav aria-label="Board pages">
+    <button class="nav-btn active" type="button" data-page="communication">Communication</button>
+    <button class="nav-btn" type="button" data-page="routine">Routine</button>
+    <button class="nav-btn" type="button" data-page="firstThen">First / Then</button>
+  </nav>
+
+  <main>
+    <section class="page active" id="communication" aria-label="Communication board">
+      <div class="grid main-grid" id="communicationGrid"></div>
+      <div class="instructions">
+        <strong>Adult tip:</strong> When she taps a button, repeat it naturally. Example: she taps <strong>drink</strong>, adult says, “Drink. Want drink.” Then help her if appropriate.
+      </div>
+    </section>
+
+    <section class="page" id="routine" aria-label="Routine board">
+      <div class="grid routine-grid" id="routineGrid"></div>
+      <div class="instructions">
+        <strong>Adult tip:</strong> Use these for transitions. Example: “First get dressed, then car.” Keep the same words every time.
+      </div>
+    </section>
+
+    <section class="page" id="firstThen" aria-label="First then board">
+      <div class="first-then-layout">
+        <div class="first-then-box first" id="firstBox" role="button" tabindex="0" aria-label="First box">
+          <div class="box-heading">First</div>
+          <div class="selected-card" id="firstSelected">
+            <div class="placeholder">Pick first</div>
+          </div>
+        </div>
+
+        <div class="first-then-box then" id="thenBox" role="button" tabindex="0" aria-label="Then box">
+          <div class="box-heading">Then</div>
+          <div class="selected-card" id="thenSelected">
+            <div class="placeholder">Pick then</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="choice-section">
+        <h2>Pick a card</h2>
+        <div class="choice-grid" id="choiceGrid"></div>
+      </div>
+
+      <div class="instructions">
+        <strong>How to use:</strong> Tap the <strong>First</strong> box, then pick a picture. Tap the <strong>Then</strong> box, then pick a picture. Use the hidden parent menu to repeat the first/then sentence if needed.
+      </div>
+    </section>
+  </main>
+
+  <div class="parent-overlay hidden" id="parentOverlay" role="dialog" aria-modal="true" aria-labelledby="parentMenuTitle">
+    <div class="parent-panel">
+      <h2 id="parentMenuTitle">Parent Menu</h2>
+      <p>Adult controls are hidden to reduce accidental taps. Press and hold the top-right corner for about 2 seconds to open this menu.</p>
+
+      <div class="settings-row">
+        <div class="settings-label">Automatic voice</div>
+        <div class="voice-status" id="voiceStatus" aria-live="polite">Finding the clearest English voice...</div>
+      </div>
+
+      <div class="settings-row">
+        <label class="settings-label" for="rateSelect">Speech speed</label>
+        <select class="rate-select" id="rateSelect" aria-label="Speech speed">
+          <option value="0.65">Very slow</option>
+          <option value="0.75" selected>Slow</option>
+          <option value="0.85">Clear</option>
+          <option value="1">Normal</option>
+        </select>
+      </div>
+
+      <div class="parent-actions">
+        <button class="small-btn" id="speakAgainBtn" type="button">Speak again</button>
+        <button class="small-btn" id="clearBtn" type="button">Clear First/Then</button>
+        <button class="small-btn" id="fullscreenBtn" type="button">Full screen</button>
+        <button class="small-btn" id="repickVoiceBtn" type="button">Re-pick voice</button>
+        <button class="small-btn" id="closeParentMenuBtn" type="button">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEYS = {
+      voiceURI: "aacBoard.voiceURI",
+      rate: "aacBoard.speechRate"
+    };
+
+    // Voice selection is automatic and hidden from the child-facing UI.
+    // On the onn Android tablet, Chrome should usually expose Google/Android TTS voices.
+    // These patterns prefer Google English US female-style voices first, then any clear English voice.
+    const preferredVoicePatterns = [
+      /google.*en.*us.*female/i,
+      /english.*united states.*female/i,
+      /google.*english.*us/i,
+      /english.*united states/i,
+      /en-US/i,
+      /english/i
+    ];
+
+    const icons = {
+      more: svg(`<circle cx="50" cy="50" r="42" fill="#e9f8ee" stroke="#1f9d55" stroke-width="6"/><path d="M50 26v48M26 50h48" stroke="#1f9d55" stroke-width="10" stroke-linecap="round"/>`),
+      help: svg(`<circle cx="37" cy="35" r="10" fill="#f2c7a5" stroke="#222" stroke-width="3"/><circle cx="63" cy="35" r="10" fill="#9b6a45" stroke="#222" stroke-width="3"/><path d="M28 84V61c0-10 8-18 18-18h8" fill="none" stroke="#222" stroke-width="5" stroke-linecap="round"/><path d="M72 84V61c0-10-8-18-18-18h-8" fill="none" stroke="#222" stroke-width="5" stroke-linecap="round"/><path d="M34 62c9 8 23 8 32 0" fill="none" stroke="#2f6fed" stroke-width="7" stroke-linecap="round"/>`),
+      stop: svg(`<polygon points="35,8 65,8 92,35 92,65 65,92 35,92 8,65 8,35" fill="#fff0f0" stroke="#d93232" stroke-width="7"/><path d="M50 23v38" stroke="#d93232" stroke-width="9" stroke-linecap="round"/><circle cx="50" cy="76" r="5" fill="#d93232"/>`),
+      allDone: svg(`<circle cx="50" cy="50" r="42" fill="#e9f8ee" stroke="#1f9d55" stroke-width="6"/><path d="M28 52l15 16 31-38" fill="none" stroke="#1f9d55" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>`),
+      break: svg(`<rect x="16" y="56" width="68" height="28" rx="14" fill="#b7d4ff" stroke="#222" stroke-width="4"/><circle cx="50" cy="35" r="14" fill="#f2c7a5" stroke="#222" stroke-width="4"/><path d="M35 60c6-9 24-9 30 0" fill="#6c8cff" stroke="#222" stroke-width="4"/><path d="M32 27c9-10 27-10 36 0" fill="none" stroke="#754c29" stroke-width="6" stroke-linecap="round"/><path d="M39 38h1M60 38h1" stroke="#222" stroke-width="5" stroke-linecap="round"/>`),
+      eat: svg(`<circle cx="54" cy="54" r="28" fill="#e8f0ff" stroke="#222" stroke-width="4"/><path d="M32 54h44" stroke="#2f6fed" stroke-width="4" stroke-linecap="round"/><path d="M22 20v62" stroke="#222" stroke-width="5" stroke-linecap="round"/><path d="M15 20v20M22 20v20M29 20v20" stroke="#222" stroke-width="4" stroke-linecap="round"/><path d="M82 20c-12 11-11 26 0 34v28" fill="none" stroke="#222" stroke-width="5" stroke-linecap="round"/>`),
+      drink: svg(`<path d="M30 18h40l-6 66H36L30 18z" fill="#e8f0ff" stroke="#222" stroke-width="5" stroke-linejoin="round"/><path d="M35 48h30" stroke="#2f6fed" stroke-width="8" stroke-linecap="round"/><path d="M68 18l11-10" stroke="#d93232" stroke-width="5" stroke-linecap="round"/>`),
+      bathroom: svg(`<path d="M34 14h32v30H34z" fill="#fff" stroke="#222" stroke-width="5"/><path d="M28 42h44v18c0 13-10 24-22 24S28 73 28 60V42z" fill="#e8f0ff" stroke="#222" stroke-width="5"/><path d="M39 84h22" stroke="#222" stroke-width="5" stroke-linecap="round"/><circle cx="58" cy="28" r="3" fill="#222"/>`),
+      yes: svg(`<circle cx="50" cy="50" r="42" fill="#e9f8ee" stroke="#1f9d55" stroke-width="6"/><path d="M27 52l16 17 32-39" fill="none" stroke="#1f9d55" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>`),
+      no: svg(`<circle cx="50" cy="50" r="42" fill="#fff0f0" stroke="#d93232" stroke-width="6"/><path d="M32 32l36 36M68 32L32 68" stroke="#d93232" stroke-width="11" stroke-linecap="round"/>`),
+      mom: svg(`<circle cx="50" cy="33" r="16" fill="#f2c7a5" stroke="#222" stroke-width="4"/><path d="M28 38c2-22 42-22 44 0" fill="none" stroke="#754c29" stroke-width="8" stroke-linecap="round"/><path d="M28 88V68c0-13 10-23 22-23s22 10 22 23v20" fill="#b58cff" stroke="#222" stroke-width="4"/><path d="M42 36h1M58 36h1" stroke="#222" stroke-width="4" stroke-linecap="round"/><path d="M43 44c5 4 9 4 14 0" fill="none" stroke="#222" stroke-width="3" stroke-linecap="round"/>`),
+      dad: svg(`<circle cx="50" cy="34" r="16" fill="#f2c7a5" stroke="#222" stroke-width="4"/><path d="M34 25c8-12 25-12 32 0" fill="none" stroke="#754c29" stroke-width="8" stroke-linecap="round"/><path d="M28 88V68c0-13 10-23 22-23s22 10 22 23v20" fill="#7bd389" stroke="#222" stroke-width="4"/><path d="M42 36h1M58 36h1" stroke="#222" stroke-width="4" stroke-linecap="round"/><path d="M43 44c5 4 9 4 14 0" fill="none" stroke="#222" stroke-width="3" stroke-linecap="round"/>`),
+      wakeUp: svg(`<circle cx="72" cy="24" r="14" fill="#ffd75e" stroke="#222" stroke-width="4"/><path d="M72 4v8M72 36v8M52 24h8M84 24h8M58 10l6 6M86 10l-6 6M58 38l6-6M86 38l-6-6" stroke="#222" stroke-width="3" stroke-linecap="round"/><rect x="16" y="56" width="68" height="24" rx="8" fill="#ffbdd0" stroke="#222" stroke-width="4"/><circle cx="38" cy="48" r="11" fill="#f2c7a5" stroke="#222" stroke-width="4"/><path d="M28 81h58" stroke="#222" stroke-width="5" stroke-linecap="round"/>`),
+      getDressed: svg(`<path d="M32 18l14 12h8l14-12 18 18-12 13-8-7v42H34V42l-8 7-12-13 18-18z" fill="#ffbdd0" stroke="#222" stroke-width="5" stroke-linejoin="round"/><path d="M46 30c2 5 6 5 8 0" fill="none" stroke="#222" stroke-width="3" stroke-linecap="round"/>`),
+      school: svg(`<path d="M15 45h70v40H15z" fill="#ffe6a6" stroke="#222" stroke-width="5"/><path d="M50 16l35 29H15L50 16z" fill="#ff8f70" stroke="#222" stroke-width="5"/><rect x="42" y="62" width="16" height="23" fill="#8fd3ff" stroke="#222" stroke-width="4"/><rect x="23" y="55" width="12" height="10" fill="#fff" stroke="#222" stroke-width="3"/><rect x="65" y="55" width="12" height="10" fill="#fff" stroke="#222" stroke-width="3"/><circle cx="50" cy="40" r="6" fill="#fff" stroke="#222" stroke-width="3"/>`),
+      car: svg(`<path d="M18 58l9-20c3-6 8-10 15-10h18c7 0 12 4 15 10l7 20v17H18V58z" fill="#8fd3ff" stroke="#222" stroke-width="5" stroke-linejoin="round"/><path d="M35 31h30l7 20H28l7-20z" fill="#e8f0ff" stroke="#222" stroke-width="4"/><circle cx="32" cy="76" r="8" fill="#333"/><circle cx="68" cy="76" r="8" fill="#333"/><path d="M20 58h10M70 58h10" stroke="#ffd75e" stroke-width="5" stroke-linecap="round"/>`),
+      play: svg(`<rect x="20" y="50" width="22" height="22" rx="4" fill="#8fd3ff" stroke="#222" stroke-width="4"/><rect x="43" y="27" width="22" height="22" rx="4" fill="#7bd389" stroke="#222" stroke-width="4"/><rect x="55" y="55" width="22" height="22" rx="4" fill="#ffd75e" stroke="#222" stroke-width="4"/><circle cx="78" cy="30" r="14" fill="#ff8f70" stroke="#222" stroke-width="4"/><path d="M68 30h20M78 20v20" stroke="#fff" stroke-width="4" stroke-linecap="round"/>`),
+      bath: svg(`<path d="M20 48h64v18c0 12-10 22-22 22H42c-12 0-22-10-22-22V48z" fill="#e8f0ff" stroke="#222" stroke-width="5"/><path d="M25 48c2-12 10-18 20-18h5" fill="none" stroke="#222" stroke-width="5" stroke-linecap="round"/><path d="M70 24v24" stroke="#222" stroke-width="5" stroke-linecap="round"/><path d="M63 24h14" stroke="#222" stroke-width="5" stroke-linecap="round"/><circle cx="40" cy="43" r="4" fill="#8fd3ff"/><circle cx="53" cy="41" r="5" fill="#8fd3ff"/><circle cx="61" cy="49" r="3" fill="#8fd3ff"/>`),
+      bed: svg(`<path d="M18 40h20c10 0 18 8 18 18v20H18V40z" fill="#b58cff" stroke="#222" stroke-width="5"/><path d="M18 58h64v20H18z" fill="#e0d5ff" stroke="#222" stroke-width="5"/><path d="M18 32v52M82 48v36" stroke="#222" stroke-width="5" stroke-linecap="round"/><circle cx="35" cy="51" r="8" fill="#fff" stroke="#222" stroke-width="3"/>`),
+      home: svg(`<path d="M14 47L50 17l36 30" fill="#ff8f70" stroke="#222" stroke-width="5" stroke-linejoin="round"/><path d="M23 46v40h54V46" fill="#ffe6a6" stroke="#222" stroke-width="5" stroke-linejoin="round"/><rect x="43" y="61" width="14" height="25" fill="#b8875a" stroke="#222" stroke-width="4"/><rect x="28" y="55" width="12" height="12" fill="#e8f0ff" stroke="#222" stroke-width="3"/><rect x="62" y="55" width="12" height="12" fill="#e8f0ff" stroke="#222" stroke-width="3"/>`),
+      cleanUp: svg(`<rect x="22" y="50" width="56" height="32" rx="7" fill="#7bd389" stroke="#222" stroke-width="5"/><path d="M28 50l8-20h28l8 20" fill="#e9f8ee" stroke="#222" stroke-width="5" stroke-linejoin="round"/><rect x="38" y="24" width="16" height="16" fill="#8fd3ff" stroke="#222" stroke-width="4"/><circle cx="65" cy="34" r="9" fill="#ff8f70" stroke="#222" stroke-width="4"/><path d="M34 66h32" stroke="#222" stroke-width="4" stroke-linecap="round"/>`),
+      shoes: svg(`<path d="M18 59c14 3 23-1 30-10 5 12 15 18 32 18v12H18V59z" fill="#8fd3ff" stroke="#222" stroke-width="5" stroke-linejoin="round"/><path d="M26 62h18M50 64h18" stroke="#fff" stroke-width="4" stroke-linecap="round"/><path d="M18 79h64" stroke="#222" stroke-width="5" stroke-linecap="round"/>`),
+      snack: svg(`<circle cx="36" cy="53" r="17" fill="#ff8f70" stroke="#222" stroke-width="5"/><path d="M37 34c4-12 14-12 19-4" fill="none" stroke="#1f9d55" stroke-width="5" stroke-linecap="round"/><path d="M59 40h18v36H48V51c0-6 5-11 11-11z" fill="#ffd75e" stroke="#222" stroke-width="5" stroke-linejoin="round"/><circle cx="59" cy="55" r="3" fill="#222"/><circle cx="68" cy="63" r="3" fill="#222"/>`),
+      outside: svg(`<circle cx="75" cy="22" r="12" fill="#ffd75e" stroke="#222" stroke-width="4"/><path d="M22 85h62" stroke="#222" stroke-width="5" stroke-linecap="round"/><path d="M32 82V45" stroke="#754c29" stroke-width="8" stroke-linecap="round"/><circle cx="32" cy="36" r="18" fill="#7bd389" stroke="#222" stroke-width="5"/><path d="M54 84c5-16 19-20 30-12" fill="none" stroke="#1f9d55" stroke-width="6" stroke-linecap="round"/>`)
+    };
+
+    function svg(inner) {
+      return `<svg viewBox="0 0 100 100" role="img" aria-hidden="true" focusable="false">${inner}</svg>`;
+    }
+
+    const communicationItems = [
+      { label: "more", icon: icons.more, phrase: "more" },
+      { label: "help", icon: icons.help, phrase: "help me", className: "help" },
+      { label: "stop", icon: icons.stop, phrase: "stop", className: "stop" },
+      { label: "all done", icon: icons.allDone, phrase: "all done" },
+      { label: "break", icon: icons.break, phrase: "I need a break", className: "break" },
+      { label: "eat", icon: icons.eat, phrase: "I want to eat" },
+      { label: "drink", icon: icons.drink, phrase: "I want a drink" },
+      { label: "bathroom", icon: icons.bathroom, phrase: "bathroom" },
+      { label: "yes", icon: icons.yes, phrase: "yes", className: "yes" },
+      { label: "no", icon: icons.no, phrase: "no", className: "no" },
+      { label: "mom", icon: icons.mom, phrase: "mom" },
+      { label: "dad", icon: icons.dad, phrase: "dad" }
+    ];
+
+    const routineItems = [
+      { label: "wake up", icon: icons.wakeUp, phrase: "wake up" },
+      { label: "eat", icon: icons.eat, phrase: "eat" },
+      { label: "get dressed", icon: icons.getDressed, phrase: "get dressed" },
+      { label: "school", icon: icons.school, phrase: "school" },
+      { label: "car", icon: icons.car, phrase: "car" },
+      { label: "play", icon: icons.play, phrase: "play" },
+      { label: "bath", icon: icons.bath, phrase: "bath" },
+      { label: "bed", icon: icons.bed, phrase: "bed" }
+    ];
+
+    const extraFirstThenItems = [
+      { label: "home", icon: icons.home, phrase: "home" },
+      { label: "clean up", icon: icons.cleanUp, phrase: "clean up" },
+      { label: "shoes", icon: icons.shoes, phrase: "shoes" },
+      { label: "snack", icon: icons.snack, phrase: "snack" },
+      { label: "outside", icon: icons.outside, phrase: "outside" }
+    ];
+
+    const firstThenChoices = [
+      ...communicationItems,
+      ...routineItems.filter(item => !communicationItems.some(existing => existing.label === item.label)),
+      ...extraFirstThenItems
+    ];
+
+    let voices = [];
+    let selectedVoice = null;
+    let lastPhrase = "";
+    let activeFirstThenBox = "first";
+    let firstChoice = null;
+    let thenChoice = null;
+    let parentHoldTimer = null;
+
+    function getSpeechRate() {
+      const rateSelect = document.getElementById("rateSelect");
+      const parsed = Number(rateSelect.value);
+      return Number.isFinite(parsed) ? parsed : 0.75;
+    }
+
+    function voiceText(voice) {
+      return `${voice.name || ""} ${voice.lang || ""} ${voice.voiceURI || ""}`.toLowerCase();
+    }
+
+    function isEnglishVoice(voice) {
+      return /^en[-_]/i.test(voice.lang || "") || /english|en-us|en-gb|en-au|en-ca/i.test(voiceText(voice));
+    }
+
+    function voiceScore(voice) {
+      const text = voiceText(voice);
+      let score = 0;
+
+      if (isEnglishVoice(voice)) score += 120;
+      else score -= 1000;
+
+      // Primary ranking: use the requested preference order.
+      preferredVoicePatterns.forEach((pattern, index) => {
+        if (pattern.test(`${voice.name || ""} ${voice.lang || ""} ${voice.voiceURI || ""}`)) {
+          score += 1000 - index * 120;
+        }
+      });
+
+      // Prefer Android/Google voices over desktop Microsoft voices when both are available.
+      if (/google|android|speech services by google/i.test(text)) score += 180;
+      if (/microsoft|jenny|zira|aria online/i.test(text)) score -= 80;
+
+      // Female-sounding name hints commonly found across mobile, browser, and OS voices.
+      if (/female|woman|girl|samantha|susan|karen|victoria|ava|serena|joanna|salli|amy|emma|olivia|tessa|linda|heather|catherine/i.test(text)) {
+        score += 55;
+      }
+
+      // Keep the voice clear and reliable for a single-file app.
+      if (/natural|neural|wavenet|enhanced|premium|clear/i.test(text)) score += 35;
+      if (voice.localService === true) score += 30;
+      if (voice.localService === false) score += 5;
+
+      // Male-sounding hints to avoid when possible.
+      if (/male|man|boy|david|mark|george|daniel|alex|fred|tom|brian|guy/i.test(text)) score -= 60;
+
+      return score;
+    }
+
+    function pickBestVoice() {
+      const englishVoices = voices.filter(isEnglishVoice);
+      const usableVoices = englishVoices.length ? englishVoices : voices;
+      return [...usableVoices].sort((a, b) => voiceScore(b) - voiceScore(a))[0] || null;
+    }
+
+    function updateVoiceStatus() {
+      const status = document.getElementById("voiceStatus");
+      if (!status) return;
+
+      if (!selectedVoice) {
+        status.textContent = "No English voice found yet. The browser will use its default voice.";
+        return;
+      }
+
+      const type = selectedVoice.localService === false ? "online/network" : "offline/local";
+      status.textContent = `Using: ${selectedVoice.name} (${selectedVoice.lang || "English"}, ${type}). Voice selection is automatic.`;
+    }
+
+    function loadVoices() {
+      if (!("speechSynthesis" in window)) {
+        const status = document.getElementById("voiceStatus");
+        if (status) status.textContent = "Speech is not supported on this browser.";
+        return;
+      }
+
+      voices = window.speechSynthesis.getVoices() || [];
+
+      if (!voices.length) {
+        const status = document.getElementById("voiceStatus");
+        if (status) status.textContent = "Finding voices...";
+        return;
+      }
+
+      selectedVoice = pickBestVoice();
+
+      if (selectedVoice) {
+        localStorage.setItem(STORAGE_KEYS.voiceURI, selectedVoice.voiceURI);
+      }
+
+      updateVoiceStatus();
+    }
+
+    function speak(text) {
+      if (!text) return;
+      lastPhrase = text;
+
+      if ("speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.rate = getSpeechRate();
+        utterance.pitch = 1.0;
+        utterance.volume = 1;
+        utterance.lang = selectedVoice?.lang || "en-US";
+        if (selectedVoice) utterance.voice = selectedVoice;
+        window.speechSynthesis.speak(utterance);
+      } else {
+        alert(text);
+      }
+    }
+
+    function makeTile(item) {
+      const button = document.createElement("button");
+      button.className = `tile ${item.className || ""}`;
+      button.type = "button";
+      button.setAttribute("aria-label", item.phrase || item.label);
+      button.innerHTML = `
+        <div class="icon">${item.icon}</div>
+        <div class="label">${item.label}</div>
+        <div class="phrase">${item.phrase || item.label}</div>
+      `;
+      button.addEventListener("click", () => speak(item.phrase || item.label));
+      return button;
+    }
+
+    function makeChoiceCard(item) {
+      const button = document.createElement("button");
+      button.className = "choice-card";
+      button.type = "button";
+      button.setAttribute("aria-label", item.label);
+      button.innerHTML = `
+        <div class="icon">${item.icon}</div>
+        <div class="label">${item.label}</div>
+      `;
+      button.addEventListener("click", () => selectFirstThenChoice(item));
+      return button;
+    }
+
+    function renderSelected(targetId, item, placeholderText) {
+      const target = document.getElementById(targetId);
+      if (!item) {
+        target.innerHTML = `<div class="placeholder">${placeholderText}</div>`;
+        return;
+      }
+
+      target.innerHTML = `
+        <div class="icon">${item.icon}</div>
+        <div class="label">${item.label}</div>
+      `;
+    }
+
+    function selectFirstThenChoice(item) {
+      if (activeFirstThenBox === "first") {
+        firstChoice = item;
+        renderSelected("firstSelected", firstChoice, "Pick first");
+        activeFirstThenBox = "then";
+        updateBoxHighlight();
+        speak(`first ${item.phrase || item.label}`);
+      } else {
+        thenChoice = item;
+        renderSelected("thenSelected", thenChoice, "Pick then");
+        updateBoxHighlight();
+        speak(`then ${item.phrase || item.label}`);
+      }
+    }
+
+    function speakFirstThenOrRepeat() {
+      if (firstChoice && thenChoice && document.getElementById("firstThen").classList.contains("active")) {
+        speak(`First ${firstChoice.phrase || firstChoice.label}, then ${thenChoice.phrase || thenChoice.label}.`);
+      } else if (lastPhrase) {
+        speak(lastPhrase);
+      } else {
+        speak("Show me");
+      }
+    }
+
+    function clearBoard() {
+      firstChoice = null;
+      thenChoice = null;
+      activeFirstThenBox = "first";
+      lastPhrase = "";
+      renderSelected("firstSelected", null, "Pick first");
+      renderSelected("thenSelected", null, "Pick then");
+      updateBoxHighlight();
+      if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+    }
+
+    function updateBoxHighlight() {
+      const firstBox = document.getElementById("firstBox");
+      const thenBox = document.getElementById("thenBox");
+      firstBox.style.borderColor = activeFirstThenBox === "first" ? "var(--primary)" : "var(--border)";
+      thenBox.style.borderColor = activeFirstThenBox === "then" ? "var(--primary)" : "var(--border)";
+    }
+
+    function showPage(pageId) {
+      document.querySelectorAll(".page").forEach(page => page.classList.remove("active"));
+      document.querySelectorAll(".nav-btn").forEach(btn => btn.classList.remove("active"));
+      document.getElementById(pageId).classList.add("active");
+      document.querySelector(`[data-page="${pageId}"]`).classList.add("active");
+    }
+
+    function requestFullscreen() {
+      const root = document.documentElement;
+      if (!document.fullscreenElement && root.requestFullscreen) {
+        root.requestFullscreen().catch(() => {});
+      } else if (document.exitFullscreen) {
+        document.exitFullscreen().catch(() => {});
+      }
+    }
+
+    function restoreRate() {
+      const savedRate = localStorage.getItem(STORAGE_KEYS.rate);
+      const rateSelect = document.getElementById("rateSelect");
+      if (savedRate && Array.from(rateSelect.options).some(option => option.value === savedRate)) {
+        rateSelect.value = savedRate;
+      }
+    }
+
+    function openParentMenu() {
+      document.getElementById("parentOverlay").classList.remove("hidden");
+      updateVoiceStatus();
+    }
+
+    function closeParentMenu() {
+      document.getElementById("parentOverlay").classList.add("hidden");
+    }
+
+    function startParentHold(event) {
+      event.preventDefault();
+      clearTimeout(parentHoldTimer);
+      parentHoldTimer = setTimeout(openParentMenu, 1800);
+    }
+
+    function cancelParentHold() {
+      clearTimeout(parentHoldTimer);
+      parentHoldTimer = null;
+    }
+
+    function initParentHotspot() {
+      const hotspot = document.getElementById("parentHotspot");
+      hotspot.addEventListener("pointerdown", startParentHold);
+      hotspot.addEventListener("pointerup", cancelParentHold);
+      hotspot.addEventListener("pointercancel", cancelParentHold);
+      hotspot.addEventListener("pointerleave", cancelParentHold);
+
+      hotspot.addEventListener("keydown", event => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          openParentMenu();
+        }
+      });
+
+      document.getElementById("closeParentMenuBtn").addEventListener("click", closeParentMenu);
+      document.getElementById("parentOverlay").addEventListener("click", event => {
+        if (event.target.id === "parentOverlay") closeParentMenu();
+      });
+    }
+
+    function init() {
+      const communicationGrid = document.getElementById("communicationGrid");
+      const routineGrid = document.getElementById("routineGrid");
+      const choiceGrid = document.getElementById("choiceGrid");
+
+      communicationItems.forEach(item => communicationGrid.appendChild(makeTile(item)));
+      routineItems.forEach(item => routineGrid.appendChild(makeTile(item)));
+      firstThenChoices.forEach(item => choiceGrid.appendChild(makeChoiceCard(item)));
+
+      document.querySelectorAll(".nav-btn").forEach(button => {
+        button.addEventListener("click", () => showPage(button.dataset.page));
+      });
+
+      document.getElementById("speakAgainBtn").addEventListener("click", speakFirstThenOrRepeat);
+      document.getElementById("clearBtn").addEventListener("click", clearBoard);
+      document.getElementById("fullscreenBtn").addEventListener("click", requestFullscreen);
+      document.getElementById("repickVoiceBtn").addEventListener("click", () => {
+        loadVoices();
+        speak("Voice selected automatically.");
+      });
+
+      document.getElementById("rateSelect").addEventListener("change", () => {
+        localStorage.setItem(STORAGE_KEYS.rate, document.getElementById("rateSelect").value);
+        speak("speech speed selected");
+      });
+
+      document.getElementById("firstBox").addEventListener("click", () => {
+        activeFirstThenBox = "first";
+        updateBoxHighlight();
+        speak("first");
+      });
+
+      document.getElementById("thenBox").addEventListener("click", () => {
+        activeFirstThenBox = "then";
+        updateBoxHighlight();
+        speak("then");
+      });
+
+      document.getElementById("firstBox").addEventListener("keydown", event => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          activeFirstThenBox = "first";
+          updateBoxHighlight();
+          speak("first");
+        }
+      });
+
+      document.getElementById("thenBox").addEventListener("keydown", event => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          activeFirstThenBox = "then";
+          updateBoxHighlight();
+          speak("then");
+        }
+      });
+
+      initParentHotspot();
+      restoreRate();
+      loadVoices();
+      if ("speechSynthesis" in window) {
+        window.speechSynthesis.onvoiceschanged = loadVoices;
+        setTimeout(loadVoices, 250);
+        setTimeout(loadVoices, 1000);
+      }
+      updateBoxHighlight();
+    }
+
+    init();
+  </script>
+</body>
+</html>
