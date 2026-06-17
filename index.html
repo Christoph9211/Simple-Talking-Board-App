@@ -735,7 +735,11 @@
 
       if (!selectedVoice) {
         if (nativeSpeechAvailable()) {
-          status.textContent = "Using Android tablet voice. Speech is handled by the installed app.";
+          try {
+            status.textContent = window.AndroidSpeech.getVoiceSummary();
+          } catch (error) {
+            status.textContent = "Using Android tablet voice. Speech is handled by the installed app.";
+          }
           return;
         }
 

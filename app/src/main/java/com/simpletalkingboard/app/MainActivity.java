@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
+import android.speech.tts.Voice;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowInsets;
@@ -14,10 +15,12 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 
 import java.util.Locale;
+import java.util.Set;
 
 public class MainActivity extends Activity {
     private TextToSpeech textToSpeech;
     private boolean ttsReady = false;
+    private String voiceSummary = "Android tablet voice initializing.";
 
     @SuppressLint({"SetJavaScriptEnabled", "AddJavascriptInterface"})
     @Override
@@ -30,7 +33,15 @@ public class MainActivity extends Activity {
                 int result = textToSpeech.setLanguage(Locale.US);
                 ttsReady = result != TextToSpeech.LANG_MISSING_DATA
                         && result != TextToSpeech.LANG_NOT_SUPPORTED;
+                Voice bestVoice = pickBestVoice();
+                if (bestVoice != null && textToSpeech.setVoice(bestVoice) == TextToSpeech.SUCCESS) {
+                    voiceSummary = describeVoice(bestVoice);
+                } else {
+                    voiceSummary = "Using Android default English voice. Better network voices were not available to this app.";
+                }
                 textToSpeech.setSpeechRate(0.75f);
+            } else {
+                voiceSummary = "Android tablet voice failed to initialize.";
             }
         });
 
@@ -84,6 +95,44 @@ public class MainActivity extends Activity {
         }
     }
 
+    private Voice pickBestVoice() {
+        Set<Voice> voices = textToSpeech.getVoices();
+        if (voices == null) return null;
+
+        Voice bestVoice = null;
+        int bestScore = Integer.MIN_VALUE;
+        for (Voice voice : voices) {
+            Locale locale = voice.getLocale();
+            if (locale == null || !"en".equalsIgnoreCase(locale.getLanguage())) continue;
+            if (voice.getFeatures() != null
+                    && voice.getFeatures().contains(TextToSpeech.Engine.KEY_FEATURE_NOT_INSTALLED)) {
+                continue;
+            }
+
+            int score = voice.getQuality() - (voice.getLatency() / 2);
+            if (Locale.US.equals(locale)) score += 1000;
+            else if ("US".equalsIgnoreCase(locale.getCountry())) score += 900;
+            else score += 500;
+            if (voice.isNetworkConnectionRequired()) score += 250;
+
+            String name = voice.getName().toLowerCase(Locale.US);
+            if (name.contains("female") || name.contains("woman")) score += 25;
+            if (score > bestScore) {
+                bestScore = score;
+                bestVoice = voice;
+            }
+        }
+        return bestVoice;
+    }
+
+    private String describeVoice(Voice voice) {
+        String type = voice.isNetworkConnectionRequired() ? "online/network" : "offline/local";
+        return "Using Android voice: " + voice.getName()
+                + " (" + voice.getLocale().toLanguageTag()
+                + ", " + type
+                + ", quality " + voice.getQuality() + ").";
+    }
+
     private class AndroidSpeechBridge {
         @JavascriptInterface
         public boolean isAvailable() {
@@ -94,6 +143,11 @@ public class MainActivity extends Activity {
         public void setRate(float rate) {
             if (textToSpeech == null) return;
             textToSpeech.setSpeechRate(Math.max(0.5f, Math.min(rate, 1.2f)));
+        }
+
+        @JavascriptInterface
+        public String getVoiceSummary() {
+            return voiceSummary;
         }
 
         @JavascriptInterface
