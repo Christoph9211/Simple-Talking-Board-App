@@ -99,11 +99,21 @@
       font-weight: 700;
     }
 
+    .voice-select {
+      width: 100%;
+      max-width: 100%;
+    }
+
     .small-btn:active,
     .nav-btn:active,
     .tile:active,
     .choice-card:active {
       transform: scale(0.98);
+    }
+
+    .small-btn:disabled {
+      opacity: 0.45;
+      cursor: default;
     }
 
     .parent-hotspot {
@@ -325,6 +335,17 @@
       cursor: pointer;
     }
 
+    .first-then-controls {
+      display: flex;
+      justify-content: center;
+      margin: -2px 0 14px;
+    }
+
+    .repeat-first-then-btn {
+      padding: 7px 12px;
+      min-width: 140px;
+    }
+
     .box-heading {
       padding: 10px;
       text-align: center;
@@ -533,6 +554,10 @@
         </div>
       </div>
 
+      <div class="first-then-controls">
+        <button class="small-btn repeat-first-then-btn" id="repeatFirstThenBtn" type="button" aria-label="Repeat first then sentence" disabled>Repeat</button>
+      </div>
+
       <div class="choice-section">
         <h2>Pick a card</h2>
         <div class="choice-grid" id="choiceGrid"></div>
@@ -550,7 +575,10 @@
       <p>Adult controls are hidden to reduce accidental taps. Press and hold the top-right corner for about 2 seconds to open this menu.</p>
 
       <div class="settings-row">
-        <div class="settings-label">Automatic voice</div>
+        <label class="settings-label" for="androidVoiceSelect">Android voice</label>
+        <select class="rate-select voice-select" id="androidVoiceSelect" aria-label="Android voice">
+          <option value="">Finding Android voices...</option>
+        </select>
         <div class="voice-status" id="voiceStatus" aria-live="polite">Finding the clearest English voice...</div>
       </div>
 
@@ -568,7 +596,7 @@
         <button class="small-btn" id="speakAgainBtn" type="button">Speak again</button>
         <button class="small-btn" id="clearBtn" type="button">Clear First/Then</button>
         <button class="small-btn" id="fullscreenBtn" type="button">Full screen</button>
-        <button class="small-btn" id="repickVoiceBtn" type="button">Re-pick voice</button>
+        <button class="small-btn" id="repickVoiceBtn" type="button">Auto-pick voice</button>
         <button class="small-btn" id="closeParentMenuBtn" type="button">Close</button>
       </div>
     </div>
@@ -580,7 +608,7 @@
       rate: "aacBoard.speechRate"
     };
 
-    // Voice selection is automatic and hidden from the child-facing UI.
+    // Browser voice selection is automatic; Android voices can be forced from the parent menu.
     // On the onn Android tablet, Chrome should usually expose Google/Android TTS voices.
     // These patterns prefer Google English US female-style voices first, then any clear English voice.
     const preferredVoicePatterns = [
@@ -678,7 +706,65 @@
     }
 
     function nativeSpeechAvailable() {
-      return typeof window.AndroidSpeech !== "undefined";
+      if (typeof window.AndroidSpeech === "undefined") return false;
+      try {
+        return window.AndroidSpeech.isAvailable();
+      } catch (error) {
+        return false;
+      }
+    }
+
+    function nativeSpeechSummary() {
+      if (typeof window.AndroidSpeech === "undefined") return "";
+      try {
+        return window.AndroidSpeech.getVoiceSummary();
+      } catch (error) {
+        return "Android speech is not ready.";
+      }
+    }
+
+    function nativeEnglishVoices() {
+      if (!nativeSpeechAvailable()) return [];
+      try {
+        return JSON.parse(window.AndroidSpeech.getEnglishVoices() || "[]");
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function nativeActiveVoiceName() {
+      if (!nativeSpeechAvailable()) return "";
+      try {
+        return window.AndroidSpeech.getActiveVoiceName() || "";
+      } catch (error) {
+        return "";
+      }
+    }
+
+    function addVoiceOption(select, value, label) {
+      const option = document.createElement("option");
+      option.value = value;
+      option.textContent = label;
+      select.appendChild(option);
+    }
+
+    function renderAndroidVoicePicker() {
+      const select = document.getElementById("androidVoiceSelect");
+      if (!select) return;
+
+      const nativeReady = nativeSpeechAvailable();
+      const nativeVoices = nativeReady ? nativeEnglishVoices() : [];
+      const activeName = nativeReady ? nativeActiveVoiceName() : "";
+      select.innerHTML = "";
+      addVoiceOption(select, "", nativeReady ? "Auto best Android voice" : "Android voices unavailable");
+
+      nativeVoices.forEach(voice => {
+        const type = voice.network ? "online/network" : "offline/local";
+        addVoiceOption(select, voice.name, `${voice.name} (${voice.lang || "English"}, ${type}, quality ${voice.quality})`);
+      });
+
+      select.disabled = !nativeReady || !nativeVoices.length;
+      select.value = nativeVoices.some(voice => voice.name === activeName) ? activeName : "";
     }
 
     function voiceText(voice) {
@@ -733,25 +819,34 @@
       const status = document.getElementById("voiceStatus");
       if (!status) return;
 
-      if (!selectedVoice) {
-        if (nativeSpeechAvailable()) {
-          try {
-            status.textContent = window.AndroidSpeech.getVoiceSummary();
-          } catch (error) {
-            status.textContent = "Using Android tablet voice. Speech is handled by the installed app.";
-          }
-          return;
-        }
+      if (nativeSpeechAvailable()) {
+        status.textContent = nativeSpeechSummary() || "Using Android speech.";
+        return;
+      }
 
-        status.textContent = "No English voice found yet. The browser will use its default voice.";
+      const nativeFallback = typeof window.AndroidSpeech !== "undefined"
+        ? " Android speech is not ready."
+        : "";
+
+      if (!("speechSynthesis" in window)) {
+        status.textContent = nativeFallback
+          ? `${nativeSpeechSummary()} Browser speech is not supported.`
+          : "Speech is not supported on this browser.";
+        return;
+      }
+
+      if (!selectedVoice) {
+        status.textContent = `Using browser default voice.${nativeFallback}`;
         return;
       }
 
       const type = selectedVoice.localService === false ? "online/network" : "offline/local";
-      status.textContent = `Using: ${selectedVoice.name} (${selectedVoice.lang || "English"}, ${type}). Voice selection is automatic.`;
+      status.textContent = `Using browser voice: ${selectedVoice.name} (${selectedVoice.lang || "English"}, ${type}).${nativeFallback}`;
     }
 
     function loadVoices() {
+      renderAndroidVoicePicker();
+
       if (nativeSpeechAvailable()) {
         selectedVoice = null;
         updateVoiceStatus();
@@ -786,8 +881,15 @@
       lastPhrase = text;
 
       if (nativeSpeechAvailable()) {
-        window.AndroidSpeech.speak(text, getSpeechRate());
-      } else if ("speechSynthesis" in window) {
+        try {
+          window.AndroidSpeech.speak(text, getSpeechRate());
+          return;
+        } catch (error) {
+          updateVoiceStatus();
+        }
+      }
+
+      if ("speechSynthesis" in window) {
         window.speechSynthesis.cancel();
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.rate = getSpeechRate();
@@ -841,6 +943,15 @@
       `;
     }
 
+    function firstThenSentence() {
+      if (!firstChoice || !thenChoice) return "";
+      return `First ${firstChoice.phrase || firstChoice.label}, then ${thenChoice.phrase || thenChoice.label}.`;
+    }
+
+    function updateFirstThenRepeatButton() {
+      document.getElementById("repeatFirstThenBtn").disabled = !firstThenSentence();
+    }
+
     function selectFirstThenChoice(item) {
       if (activeFirstThenBox === "first") {
         firstChoice = item;
@@ -854,16 +965,23 @@
         updateBoxHighlight();
         speak(`then ${item.phrase || item.label}`);
       }
+      updateFirstThenRepeatButton();
     }
 
     function speakFirstThenOrRepeat() {
-      if (firstChoice && thenChoice && document.getElementById("firstThen").classList.contains("active")) {
-        speak(`First ${firstChoice.phrase || firstChoice.label}, then ${thenChoice.phrase || thenChoice.label}.`);
+      const sentence = document.getElementById("firstThen").classList.contains("active") ? firstThenSentence() : "";
+      if (sentence) {
+        speak(sentence);
       } else if (lastPhrase) {
         speak(lastPhrase);
       } else {
         speak("Show me");
       }
+    }
+
+    function speakFirstThenSentence() {
+      const sentence = firstThenSentence();
+      if (sentence) speak(sentence);
     }
 
     function clearBoard() {
@@ -874,6 +992,7 @@
       renderSelected("firstSelected", null, "Pick first");
       renderSelected("thenSelected", null, "Pick then");
       updateBoxHighlight();
+      updateFirstThenRepeatButton();
       if (nativeSpeechAvailable()) {
         window.AndroidSpeech.stop();
       } else if ("speechSynthesis" in window) {
@@ -914,7 +1033,7 @@
 
     function openParentMenu() {
       document.getElementById("parentOverlay").classList.remove("hidden");
-      updateVoiceStatus();
+      loadVoices();
     }
 
     function closeParentMenu() {
@@ -966,9 +1085,32 @@
       });
 
       document.getElementById("speakAgainBtn").addEventListener("click", speakFirstThenOrRepeat);
+      document.getElementById("repeatFirstThenBtn").addEventListener("click", speakFirstThenSentence);
       document.getElementById("clearBtn").addEventListener("click", clearBoard);
       document.getElementById("fullscreenBtn").addEventListener("click", requestFullscreen);
+      document.getElementById("androidVoiceSelect").addEventListener("change", event => {
+        if (!nativeSpeechAvailable()) return;
+        let changed = false;
+        try {
+          changed = window.AndroidSpeech.selectVoice(event.target.value);
+        } catch (error) {
+          changed = false;
+        }
+        renderAndroidVoicePicker();
+        updateVoiceStatus();
+        if (changed) speak(event.target.value ? "Voice selected." : "Automatic voice selected.");
+      });
       document.getElementById("repickVoiceBtn").addEventListener("click", () => {
+        if (nativeSpeechAvailable()) {
+          try {
+            window.AndroidSpeech.selectVoice("");
+          } catch (error) {
+          }
+          renderAndroidVoicePicker();
+          updateVoiceStatus();
+          speak("Automatic voice selected.");
+          return;
+        }
         loadVoices();
         speak("Voice selected automatically.");
       });
@@ -1016,10 +1158,12 @@
       loadVoices();
       if ("speechSynthesis" in window) {
         window.speechSynthesis.onvoiceschanged = loadVoices;
-        setTimeout(loadVoices, 250);
-        setTimeout(loadVoices, 1000);
       }
+      setTimeout(loadVoices, 250);
+      setTimeout(loadVoices, 1000);
+      setTimeout(loadVoices, 2500);
       updateBoxHighlight();
+      updateFirstThenRepeatButton();
     }
 
     init();
