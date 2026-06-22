@@ -11,6 +11,22 @@ android {
         versionCode 1
         versionName "1.0"
     }
+
+    signingConfigs {
+        sideload {
+            // ponytail: sideload-only update key; use a private release key if this leaves the tablet workflow.
+            storeFile rootProject.file("talking-board-sideload.keystore")
+            storePassword "android"
+            keyAlias "talking-board"
+            keyPassword "android"
+        }
+    }
+
+    buildTypes {
+        release {
+            signingConfig signingConfigs.sideload
+        }
+    }
 }
 
 tasks.register("copyBoardHtml", Copy) {

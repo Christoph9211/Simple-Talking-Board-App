@@ -2,22 +2,38 @@
 
 This project wraps `index.html` in a native Android WebView so it can be installed from an APK.
 
-## Build the installable APK
+## Edit the board
+
+Keep editing `index.html`. The Android build copies that single file into the WebView assets.
+
+## Build the stable tablet APK
 
 ```powershell
-& "$env:USERPROFILE\.gradle\wrapper\dists\gradle-8.10.2-bin\a04bxjujx95o3nb99gddekhwo\gradle-8.10.2\bin\gradle.bat" assembleDebug
+$gradle = "$env:USERPROFILE\.gradle\wrapper\dists\gradle-8.9-bin\90cnw93cvbtalezasaz0blq0a\gradle-8.9\bin\gradle.bat"
+& $gradle assembleRelease
 ```
 
 The APK is written to:
 
 ```text
-app/build/outputs/apk/debug/app-debug.apk
+app/build/outputs/apk/release/app-release.apk
 ```
 
-## Install on a connected Android device
+It is signed with `talking-board-sideload.keystore`. Keep that file; deleting or replacing it changes the signing certificate and breaks clean updates.
+
+## First install or switch from the old debug APK
+
+Android cannot update over an installed copy signed with a different key. If the tablet currently has the old app and `adb install -r` reports `INSTALL_FAILED_UPDATE_INCOMPATIBLE`, uninstall once:
 
 ```powershell
-adb install -r app/build/outputs/apk/debug/app-debug.apk
+adb uninstall com.simpletalkingboard.app
+adb install app/build/outputs/apk/release/app-release.apk
 ```
 
-The debug APK is signed by Gradle and can be installed directly on an Android tablet with app installs from unknown sources enabled.
+## Future updates on the same tablet
+
+```powershell
+$gradle = "$env:USERPROFILE\.gradle\wrapper\dists\gradle-8.9-bin\90cnw93cvbtalezasaz0blq0a\gradle-8.9\bin\gradle.bat"
+& $gradle assembleRelease
+adb install -r app/build/outputs/apk/release/app-release.apk
+```
