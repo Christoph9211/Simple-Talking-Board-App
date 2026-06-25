@@ -94,6 +94,13 @@
       box-shadow: 0 2px 8px rgba(0,0,0,0.04);
     }
 
+    .nav-btn {
+      min-height: 58px;
+      width: 100%;
+      white-space: normal;
+      text-align: center;
+    }
+
     .rate-select {
       max-width: 170px;
       font-weight: 700;
@@ -199,12 +206,12 @@
     }
 
     nav {
-      display: flex;
-      gap: 8px;
-      padding: 10px 14px;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      padding: 12px 14px;
       background: #fff;
       border-bottom: 1px solid var(--border);
-      overflow-x: auto;
     }
 
     .nav-btn.active {
@@ -214,7 +221,7 @@
     }
 
     main {
-      padding: 14px;
+      padding: 18px;
       flex: 1;
     }
 
@@ -228,7 +235,7 @@
 
     .grid {
       display: grid;
-      gap: 12px;
+      gap: 18px;
     }
 
     .main-grid {
@@ -240,7 +247,7 @@
     }
 
     .tile {
-      min-height: clamp(115px, 20vh, 175px);
+      min-height: clamp(150px, 24vh, 230px);
       border: 3px solid var(--border);
       border-radius: 24px;
       background: var(--card);
@@ -252,7 +259,8 @@
       gap: 8px;
       cursor: pointer;
       user-select: none;
-      padding: 10px;
+      padding: 16px;
+      transition: background 120ms ease, border-color 120ms ease, box-shadow 120ms ease, transform 120ms ease;
     }
 
     .tile:focus-visible,
@@ -265,9 +273,16 @@
       outline-offset: 3px;
     }
 
+    .tile.is-speaking,
+    .choice-card.is-speaking {
+      border-color: var(--primary);
+      background: var(--primary-soft);
+      box-shadow: 0 0 0 6px rgba(47, 111, 237, 0.16), var(--shadow);
+    }
+
     .icon {
-      width: clamp(48px, 8vw, 88px);
-      height: clamp(48px, 8vw, 88px);
+      width: clamp(58px, 9vw, 98px);
+      height: clamp(58px, 9vw, 98px);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -319,8 +334,8 @@
     .first-then-layout {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 14px;
-      margin-bottom: 14px;
+      gap: 18px;
+      margin-bottom: 18px;
     }
 
     .first-then-box {
@@ -333,6 +348,7 @@
       overflow: hidden;
       box-shadow: var(--shadow);
       cursor: pointer;
+      transition: background 120ms ease, border-color 120ms ease, box-shadow 120ms ease;
     }
 
     .first-then-controls {
@@ -360,6 +376,18 @@
 
     .then .box-heading {
       background: #eef9e8;
+    }
+
+    .first-then-box.active-target {
+      border-color: var(--primary);
+      background: var(--primary-soft);
+      box-shadow: 0 0 0 6px rgba(47, 111, 237, 0.16), var(--shadow);
+    }
+
+    .first-then-box.active-target .box-heading {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
     }
 
     .selected-card {
@@ -406,16 +434,16 @@
 
     .choice-grid {
       display: grid;
-      grid-template-columns: repeat(6, minmax(80px, 1fr));
-      gap: 8px;
+      grid-template-columns: repeat(5, minmax(100px, 1fr));
+      gap: 14px;
     }
 
     .choice-card {
       border: 2px solid var(--border);
       background: #fff;
       border-radius: 16px;
-      min-height: 96px;
-      padding: 8px;
+      min-height: 126px;
+      padding: 12px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -423,6 +451,7 @@
       gap: 4px;
       cursor: pointer;
       user-select: none;
+      transition: background 120ms ease, border-color 120ms ease, box-shadow 120ms ease, transform 120ms ease;
     }
 
     .choice-card .icon {
@@ -437,28 +466,28 @@
       text-align: center;
     }
 
-    .instructions {
-      margin-top: 12px;
+    .parent-tip {
+      margin: 12px 0;
       background: #fff;
       border: 2px solid var(--border);
       border-radius: 20px;
       padding: 12px;
-      font-size: clamp(15px, 2vw, 20px);
+      font-size: 15px;
       line-height: 1.35;
     }
 
-    .instructions strong {
+    .parent-tip strong {
       font-weight: 900;
     }
 
     @media (orientation: portrait) {
       .main-grid,
       .routine-grid {
-        grid-template-columns: repeat(3, minmax(100px, 1fr));
+        grid-template-columns: repeat(2, minmax(0, 1fr));
       }
 
       .choice-grid {
-        grid-template-columns: repeat(3, minmax(80px, 1fr));
+        grid-template-columns: repeat(2, minmax(0, 1fr));
       }
 
       .first-then-layout {
@@ -474,14 +503,13 @@
 
       .main-grid,
       .routine-grid {
-        grid-template-columns: repeat(2, minmax(100px, 1fr));
+        grid-template-columns: repeat(2, minmax(0, 1fr));
       }
     }
 
     @media print {
       header,
       nav,
-      .instructions,
       .parent-hotspot,
       .parent-overlay {
         display: none !important;
@@ -525,16 +553,10 @@
   <main>
     <section class="page active" id="communication" aria-label="Communication board">
       <div class="grid main-grid" id="communicationGrid"></div>
-      <div class="instructions">
-        <strong>Adult tip:</strong> When she taps a button, repeat it naturally. Example: she taps <strong>drink</strong>, adult says, “Drink. Want drink.” Then help her if appropriate.
-      </div>
     </section>
 
     <section class="page" id="routine" aria-label="Routine board">
       <div class="grid routine-grid" id="routineGrid"></div>
-      <div class="instructions">
-        <strong>Adult tip:</strong> Use these for transitions. Example: “First get dressed, then car.” Keep the same words every time.
-      </div>
     </section>
 
     <section class="page" id="firstThen" aria-label="First then board">
@@ -562,10 +584,6 @@
         <h2>Pick a card</h2>
         <div class="choice-grid" id="choiceGrid"></div>
       </div>
-
-      <div class="instructions">
-        <strong>How to use:</strong> Tap the <strong>First</strong> box, then pick a picture. Tap the <strong>Then</strong> box, then pick a picture. Use the hidden parent menu to repeat the first/then sentence if needed.
-      </div>
     </section>
   </main>
 
@@ -573,6 +591,18 @@
     <div class="parent-panel">
       <h2 id="parentMenuTitle">Parent Menu</h2>
       <p>Adult controls are hidden to reduce accidental taps. Press and hold the top-right corner for about 2 seconds to open this menu.</p>
+
+      <div class="parent-tip">
+        <strong>Communication tip:</strong> When she taps a button, repeat it naturally. Example: she taps <strong>drink</strong>, adult says, "Drink. Want drink."
+      </div>
+
+      <div class="parent-tip">
+        <strong>Routine tip:</strong> Use the same short words for transitions. Example: "First get dressed, then car."
+      </div>
+
+      <div class="parent-tip">
+        <strong>First / Then tip:</strong> Tap First or Then, then pick a picture. Use Repeat if the full sentence needs to be modeled again.
+      </div>
 
       <div class="settings-row">
         <label class="settings-label" for="androidVoiceSelect">Android voice</label>
@@ -698,6 +728,7 @@
     let firstChoice = null;
     let thenChoice = null;
     let parentHoldTimer = null;
+    let speakingFeedbackTimer = null;
 
     function getSpeechRate() {
       const rateSelect = document.getElementById("rateSelect");
@@ -903,6 +934,16 @@
       }
     }
 
+    function showSpeakingFeedback(element) {
+      if (!element) return;
+      clearTimeout(speakingFeedbackTimer);
+      document.querySelectorAll(".is-speaking").forEach(active => active.classList.remove("is-speaking"));
+      element.classList.add("is-speaking");
+      speakingFeedbackTimer = setTimeout(() => {
+        element.classList.remove("is-speaking");
+      }, 900);
+    }
+
     function makeTile(item) {
       const button = document.createElement("button");
       button.className = `tile ${item.className || ""}`;
@@ -913,7 +954,10 @@
         <div class="label">${item.label}</div>
         <div class="phrase">${item.phrase || item.label}</div>
       `;
-      button.addEventListener("click", () => speak(item.phrase || item.label));
+      button.addEventListener("click", () => {
+        showSpeakingFeedback(button);
+        speak(item.phrase || item.label);
+      });
       return button;
     }
 
@@ -926,7 +970,10 @@
         <div class="icon">${item.icon}</div>
         <div class="label">${item.label}</div>
       `;
-      button.addEventListener("click", () => selectFirstThenChoice(item));
+      button.addEventListener("click", () => {
+        showSpeakingFeedback(button);
+        selectFirstThenChoice(item);
+      });
       return button;
     }
 
@@ -1003,8 +1050,8 @@
     function updateBoxHighlight() {
       const firstBox = document.getElementById("firstBox");
       const thenBox = document.getElementById("thenBox");
-      firstBox.style.borderColor = activeFirstThenBox === "first" ? "var(--primary)" : "var(--border)";
-      thenBox.style.borderColor = activeFirstThenBox === "then" ? "var(--primary)" : "var(--border)";
+      firstBox.classList.toggle("active-target", activeFirstThenBox === "first");
+      thenBox.classList.toggle("active-target", activeFirstThenBox === "then");
     }
 
     function showPage(pageId) {
