@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
+import android.speech.tts.UtteranceProgressListener;
 import android.speech.tts.Voice;
 import android.view.View;
 import android.view.Window;
@@ -30,6 +31,7 @@ public class MainActivity extends Activity {
     private static final String PREF_KEY_VOICE = "preferredVoiceName";
 
     private TextToSpeech textToSpeech;
+    private WebView webView;
     private volatile boolean ttsReady = false;
     private volatile String voiceSummary = "Android tablet voice initializing.";
     private volatile String activeVoiceName = "";
@@ -57,8 +59,28 @@ public class MainActivity extends Activity {
                 voiceSummary = "Android tablet voice failed to initialize.";
             }
         });
+        textToSpeech.setOnUtteranceProgressListener(new UtteranceProgressListener() {
+            @Override
+            public void onStart(String utteranceId) {
+            }
 
-        WebView webView = new WebView(this);
+            @Override
+            public void onDone(String utteranceId) {
+                notifySpeechFinished(utteranceId);
+            }
+
+            @Override
+            public void onError(String utteranceId) {
+                notifySpeechFinished(utteranceId);
+            }
+
+            @Override
+            public void onStop(String utteranceId, boolean interrupted) {
+                notifySpeechFinished(utteranceId);
+            }
+        });
+
+        webView = new WebView(this);
         WebSettings settings = webView.getSettings();
         settings.setJavaScriptEnabled(true);
         settings.setDomStorageEnabled(true);
@@ -201,6 +223,15 @@ public class MainActivity extends Activity {
                 + (parentChoice ? "Saved parent choice." : "Auto selected.");
     }
 
+    private void notifySpeechFinished(String utteranceId) {
+        if (webView == null || utteranceId == null) return;
+        webView.post(() -> webView.evaluateJavascript(
+                "if (window.onNativeSpeechFinished) window.onNativeSpeechFinished("
+                        + JSONObject.quote(utteranceId) + ")",
+                null
+        ));
+    }
+
     private class AndroidSpeechBridge {
         @JavascriptInterface
         public boolean isAvailable() {
@@ -245,11 +276,13 @@ public class MainActivity extends Activity {
         }
 
         @JavascriptInterface
-        public void speak(String text, float rate) {
-            if (textToSpeech == null || !ttsReady || text == null || text.trim().isEmpty()) return;
+        public boolean speak(String text, float rate, String utteranceId) {
+            if (textToSpeech == null || !ttsReady || text == null || text.trim().isEmpty()
+                    || utteranceId == null || utteranceId.isEmpty()) return false;
             textToSpeech.setSpeechRate(Math.max(0.5f, Math.min(rate, 1.2f)));
             textToSpeech.stop();
-            textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null, "board-utterance");
+            return textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null, utteranceId)
+                    == TextToSpeech.SUCCESS;
         }
 
         @JavascriptInterface

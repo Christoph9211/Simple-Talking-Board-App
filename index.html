@@ -728,7 +728,8 @@
     let firstChoice = null;
     let thenChoice = null;
     let parentHoldTimer = null;
-    let speakingFeedbackTimer = null;
+    let speechRequestId = 0;
+    let speakingFeedbackElement = null;
 
     function getSpeechRate() {
       const rateSelect = document.getElementById("rateSelect");
@@ -907,14 +908,15 @@
       updateVoiceStatus();
     }
 
-    function speak(text) {
+    function speak(text, feedbackElement = null) {
       if (!text) return;
       lastPhrase = text;
+      const requestId = String(++speechRequestId);
+      showSpeakingFeedback(feedbackElement);
 
       if (nativeSpeechAvailable()) {
         try {
-          window.AndroidSpeech.speak(text, getSpeechRate());
-          return;
+          if (window.AndroidSpeech.speak(text, getSpeechRate(), requestId)) return;
         } catch (error) {
           updateVoiceStatus();
         }
@@ -928,20 +930,27 @@
         utterance.volume = 1;
         utterance.lang = selectedVoice?.lang || "en-US";
         if (selectedVoice) utterance.voice = selectedVoice;
+        utterance.onend = () => finishSpeakingFeedback(requestId);
+        utterance.onerror = () => finishSpeakingFeedback(requestId);
         window.speechSynthesis.speak(utterance);
       } else {
         alert(text);
+        finishSpeakingFeedback(requestId);
       }
     }
 
+    function finishSpeakingFeedback(requestId) {
+      if (requestId !== String(speechRequestId)) return;
+      speakingFeedbackElement?.classList.remove("is-speaking");
+      speakingFeedbackElement = null;
+    }
+
+    window.onNativeSpeechFinished = finishSpeakingFeedback;
+
     function showSpeakingFeedback(element) {
-      if (!element) return;
-      clearTimeout(speakingFeedbackTimer);
       document.querySelectorAll(".is-speaking").forEach(active => active.classList.remove("is-speaking"));
-      element.classList.add("is-speaking");
-      speakingFeedbackTimer = setTimeout(() => {
-        element.classList.remove("is-speaking");
-      }, 900);
+      speakingFeedbackElement = element;
+      element?.classList.add("is-speaking");
     }
 
     function makeTile(item) {
@@ -954,10 +963,7 @@
         <div class="label">${item.label}</div>
         <div class="phrase">${item.phrase || item.label}</div>
       `;
-      button.addEventListener("click", () => {
-        showSpeakingFeedback(button);
-        speak(item.phrase || item.label);
-      });
+      button.addEventListener("click", () => speak(item.phrase || item.label, button));
       return button;
     }
 
@@ -970,10 +976,7 @@
         <div class="icon">${item.icon}</div>
         <div class="label">${item.label}</div>
       `;
-      button.addEventListener("click", () => {
-        showSpeakingFeedback(button);
-        selectFirstThenChoice(item);
-      });
+      button.addEventListener("click", () => selectFirstThenChoice(item, button));
       return button;
     }
 
@@ -999,18 +1002,18 @@
       document.getElementById("repeatFirstThenBtn").disabled = !firstThenSentence();
     }
 
-    function selectFirstThenChoice(item) {
+    function selectFirstThenChoice(item, feedbackElement) {
       if (activeFirstThenBox === "first") {
         firstChoice = item;
         renderSelected("firstSelected", firstChoice, "Pick first");
         activeFirstThenBox = "then";
         updateBoxHighlight();
-        speak(`first ${item.phrase || item.label}`);
+        speak(`first ${item.phrase || item.label}`, feedbackElement);
       } else {
         thenChoice = item;
         renderSelected("thenSelected", thenChoice, "Pick then");
         updateBoxHighlight();
-        speak(`then ${item.phrase || item.label}`);
+        speak(`then ${item.phrase || item.label}`, feedbackElement);
       }
       updateFirstThenRepeatButton();
     }
@@ -1045,6 +1048,7 @@
       } else if ("speechSynthesis" in window) {
         window.speechSynthesis.cancel();
       }
+      showSpeakingFeedback(null);
     }
 
     function updateBoxHighlight() {
