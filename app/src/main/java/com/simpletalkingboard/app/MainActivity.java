@@ -250,6 +250,11 @@ public class MainActivity extends Activity {
         }
 
         @JavascriptInterface
+        public String getBuildInfo() {
+            return "Version " + BuildConfig.VERSION_NAME + " (build " + BuildConfig.VERSION_CODE + ")";
+        }
+
+        @JavascriptInterface
         public String getEnglishVoices() {
             if (textToSpeech == null || !ttsReady) return "[]";
             return getEnglishVoicesJson();

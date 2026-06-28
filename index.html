@@ -622,6 +622,11 @@
         </select>
       </div>
 
+      <div class="settings-row">
+        <div class="settings-label">Installed build</div>
+        <div class="voice-status" id="buildInfo">Browser preview (no installed APK version).</div>
+      </div>
+
       <div class="parent-actions">
         <button class="small-btn" id="speakAgainBtn" type="button">Speak again</button>
         <button class="small-btn" id="clearBtn" type="button">Clear First/Then</button>
@@ -1085,6 +1090,10 @@
     function openParentMenu() {
       document.getElementById("parentOverlay").classList.remove("hidden");
       loadVoices();
+      try {
+        document.getElementById("buildInfo").textContent = window.AndroidSpeech.getBuildInfo();
+      } catch (error) {
+      }
     }
 
     function closeParentMenu() {

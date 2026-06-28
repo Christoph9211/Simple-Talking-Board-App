@@ -2,6 +2,10 @@
 
 This project wraps `index.html` in a native Android WebView so it can be installed from an APK.
 
+## Release 1.1 (versionCode 2)
+
+This tablet release includes the June 25 board layout and speaking feedback changes.
+
 ## Edit the board
 
 Keep editing `index.html`. The Android build copies that single file into the WebView assets.
@@ -36,4 +40,5 @@ adb install app/build/outputs/apk/release/app-release.apk
 $gradle = "$env:USERPROFILE\.gradle\wrapper\dists\gradle-8.9-bin\90cnw93cvbtalezasaz0blq0a\gradle-8.9\bin\gradle.bat"
 & $gradle assembleRelease
 adb install -r app/build/outputs/apk/release/app-release.apk
+adb shell dumpsys package com.simpletalkingboard.app | Select-String "versionCode|versionName"
 ```
