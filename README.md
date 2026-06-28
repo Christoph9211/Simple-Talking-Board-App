@@ -13,8 +13,7 @@ Keep editing `index.html`. The Android build copies that single file into the We
 ## Build the stable tablet APK
 
 ```powershell
-$gradle = "$env:USERPROFILE\.gradle\wrapper\dists\gradle-8.9-bin\90cnw93cvbtalezasaz0blq0a\gradle-8.9\bin\gradle.bat"
-& $gradle assembleRelease
+.\gradlew.bat assembleRelease
 ```
 
 The APK is written to:
@@ -37,8 +36,7 @@ adb install app/build/outputs/apk/release/app-release.apk
 ## Future updates on the same tablet
 
 ```powershell
-$gradle = "$env:USERPROFILE\.gradle\wrapper\dists\gradle-8.9-bin\90cnw93cvbtalezasaz0blq0a\gradle-8.9\bin\gradle.bat"
-& $gradle assembleRelease
+.\gradlew.bat assembleRelease
 adb install -r app/build/outputs/apk/release/app-release.apk
 adb shell dumpsys package com.simpletalkingboard.app | Select-String "versionCode|versionName"
 ```

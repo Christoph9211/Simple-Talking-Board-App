@@ -174,7 +174,7 @@ public class MainActivity extends Activity {
         if (Locale.US.equals(locale)) score += 1000;
         else if ("US".equalsIgnoreCase(locale.getCountry())) score += 900;
         else score += 500;
-        if (voice.isNetworkConnectionRequired()) score += 250;
+        if (voice.isNetworkConnectionRequired()) score -= 250;
 
         String name = voice.getName().toLowerCase(Locale.US);
         if (name.contains("female") || name.contains("woman")) score += 25;
