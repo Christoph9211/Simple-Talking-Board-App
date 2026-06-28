@@ -94,21 +94,9 @@
       box-shadow: 0 2px 8px rgba(0,0,0,0.04);
     }
 
-    .nav-btn {
-      min-height: 58px;
-      width: 100%;
-      white-space: normal;
-      text-align: center;
-    }
-
     .rate-select {
       max-width: 170px;
       font-weight: 700;
-    }
-
-    .voice-select {
-      width: 100%;
-      max-width: 100%;
     }
 
     .small-btn:active,
@@ -116,11 +104,6 @@
     .tile:active,
     .choice-card:active {
       transform: scale(0.98);
-    }
-
-    .small-btn:disabled {
-      opacity: 0.45;
-      cursor: default;
     }
 
     .parent-hotspot {
@@ -206,12 +189,12 @@
     }
 
     nav {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 12px;
-      padding: 12px 14px;
+      display: flex;
+      gap: 8px;
+      padding: 10px 14px;
       background: #fff;
       border-bottom: 1px solid var(--border);
+      overflow-x: auto;
     }
 
     .nav-btn.active {
@@ -221,7 +204,7 @@
     }
 
     main {
-      padding: 18px;
+      padding: 14px;
       flex: 1;
     }
 
@@ -235,7 +218,7 @@
 
     .grid {
       display: grid;
-      gap: 18px;
+      gap: 12px;
     }
 
     .main-grid {
@@ -247,7 +230,7 @@
     }
 
     .tile {
-      min-height: clamp(150px, 24vh, 230px);
+      min-height: clamp(115px, 20vh, 175px);
       border: 3px solid var(--border);
       border-radius: 24px;
       background: var(--card);
@@ -259,8 +242,7 @@
       gap: 8px;
       cursor: pointer;
       user-select: none;
-      padding: 16px;
-      transition: background 120ms ease, border-color 120ms ease, box-shadow 120ms ease, transform 120ms ease;
+      padding: 10px;
     }
 
     .tile:focus-visible,
@@ -273,16 +255,9 @@
       outline-offset: 3px;
     }
 
-    .tile.is-speaking,
-    .choice-card.is-speaking {
-      border-color: var(--primary);
-      background: var(--primary-soft);
-      box-shadow: 0 0 0 6px rgba(47, 111, 237, 0.16), var(--shadow);
-    }
-
     .icon {
-      width: clamp(58px, 9vw, 98px);
-      height: clamp(58px, 9vw, 98px);
+      width: clamp(48px, 8vw, 88px);
+      height: clamp(48px, 8vw, 88px);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -334,8 +309,8 @@
     .first-then-layout {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 18px;
-      margin-bottom: 18px;
+      gap: 14px;
+      margin-bottom: 14px;
     }
 
     .first-then-box {
@@ -348,18 +323,6 @@
       overflow: hidden;
       box-shadow: var(--shadow);
       cursor: pointer;
-      transition: background 120ms ease, border-color 120ms ease, box-shadow 120ms ease;
-    }
-
-    .first-then-controls {
-      display: flex;
-      justify-content: center;
-      margin: -2px 0 14px;
-    }
-
-    .repeat-first-then-btn {
-      padding: 7px 12px;
-      min-width: 140px;
     }
 
     .box-heading {
@@ -376,18 +339,6 @@
 
     .then .box-heading {
       background: #eef9e8;
-    }
-
-    .first-then-box.active-target {
-      border-color: var(--primary);
-      background: var(--primary-soft);
-      box-shadow: 0 0 0 6px rgba(47, 111, 237, 0.16), var(--shadow);
-    }
-
-    .first-then-box.active-target .box-heading {
-      background: var(--primary);
-      border-color: var(--primary);
-      color: #fff;
     }
 
     .selected-card {
@@ -434,16 +385,16 @@
 
     .choice-grid {
       display: grid;
-      grid-template-columns: repeat(5, minmax(100px, 1fr));
-      gap: 14px;
+      grid-template-columns: repeat(6, minmax(80px, 1fr));
+      gap: 8px;
     }
 
     .choice-card {
       border: 2px solid var(--border);
       background: #fff;
       border-radius: 16px;
-      min-height: 126px;
-      padding: 12px;
+      min-height: 96px;
+      padding: 8px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -451,7 +402,6 @@
       gap: 4px;
       cursor: pointer;
       user-select: none;
-      transition: background 120ms ease, border-color 120ms ease, box-shadow 120ms ease, transform 120ms ease;
     }
 
     .choice-card .icon {
@@ -466,28 +416,28 @@
       text-align: center;
     }
 
-    .parent-tip {
-      margin: 12px 0;
+    .instructions {
+      margin-top: 12px;
       background: #fff;
       border: 2px solid var(--border);
       border-radius: 20px;
       padding: 12px;
-      font-size: 15px;
+      font-size: clamp(15px, 2vw, 20px);
       line-height: 1.35;
     }
 
-    .parent-tip strong {
+    .instructions strong {
       font-weight: 900;
     }
 
     @media (orientation: portrait) {
       .main-grid,
       .routine-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-columns: repeat(3, minmax(100px, 1fr));
       }
 
       .choice-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-columns: repeat(3, minmax(80px, 1fr));
       }
 
       .first-then-layout {
@@ -503,13 +453,14 @@
 
       .main-grid,
       .routine-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-columns: repeat(2, minmax(100px, 1fr));
       }
     }
 
     @media print {
       header,
       nav,
+      .instructions,
       .parent-hotspot,
       .parent-overlay {
         display: none !important;
@@ -553,10 +504,16 @@
   <main>
     <section class="page active" id="communication" aria-label="Communication board">
       <div class="grid main-grid" id="communicationGrid"></div>
+      <div class="instructions">
+        <strong>Adult tip:</strong> When she taps a button, repeat it naturally. Example: she taps <strong>drink</strong>, adult says, “Drink. Want drink.” Then help her if appropriate.
+      </div>
     </section>
 
     <section class="page" id="routine" aria-label="Routine board">
       <div class="grid routine-grid" id="routineGrid"></div>
+      <div class="instructions">
+        <strong>Adult tip:</strong> Use these for transitions. Example: “First get dressed, then car.” Keep the same words every time.
+      </div>
     </section>
 
     <section class="page" id="firstThen" aria-label="First then board">
@@ -576,13 +533,13 @@
         </div>
       </div>
 
-      <div class="first-then-controls">
-        <button class="small-btn repeat-first-then-btn" id="repeatFirstThenBtn" type="button" aria-label="Repeat first then sentence" disabled>Repeat</button>
-      </div>
-
       <div class="choice-section">
         <h2>Pick a card</h2>
         <div class="choice-grid" id="choiceGrid"></div>
+      </div>
+
+      <div class="instructions">
+        <strong>How to use:</strong> Tap the <strong>First</strong> box, then pick a picture. Tap the <strong>Then</strong> box, then pick a picture. Use the hidden parent menu to repeat the first/then sentence if needed.
       </div>
     </section>
   </main>
@@ -592,23 +549,8 @@
       <h2 id="parentMenuTitle">Parent Menu</h2>
       <p>Adult controls are hidden to reduce accidental taps. Press and hold the top-right corner for about 2 seconds to open this menu.</p>
 
-      <div class="parent-tip">
-        <strong>Communication tip:</strong> When she taps a button, repeat it naturally. Example: she taps <strong>drink</strong>, adult says, "Drink. Want drink."
-      </div>
-
-      <div class="parent-tip">
-        <strong>Routine tip:</strong> Use the same short words for transitions. Example: "First get dressed, then car."
-      </div>
-
-      <div class="parent-tip">
-        <strong>First / Then tip:</strong> Tap First or Then, then pick a picture. Use Repeat if the full sentence needs to be modeled again.
-      </div>
-
       <div class="settings-row">
-        <label class="settings-label" for="androidVoiceSelect">Android voice</label>
-        <select class="rate-select voice-select" id="androidVoiceSelect" aria-label="Android voice">
-          <option value="">Finding Android voices...</option>
-        </select>
+        <div class="settings-label">Automatic voice</div>
         <div class="voice-status" id="voiceStatus" aria-live="polite">Finding the clearest English voice...</div>
       </div>
 
@@ -622,16 +564,11 @@
         </select>
       </div>
 
-      <div class="settings-row">
-        <div class="settings-label">Installed build</div>
-        <div class="voice-status" id="buildInfo">Browser preview (no installed APK version).</div>
-      </div>
-
       <div class="parent-actions">
         <button class="small-btn" id="speakAgainBtn" type="button">Speak again</button>
         <button class="small-btn" id="clearBtn" type="button">Clear First/Then</button>
         <button class="small-btn" id="fullscreenBtn" type="button">Full screen</button>
-        <button class="small-btn" id="repickVoiceBtn" type="button">Auto-pick voice</button>
+        <button class="small-btn" id="repickVoiceBtn" type="button">Re-pick voice</button>
         <button class="small-btn" id="closeParentMenuBtn" type="button">Close</button>
       </div>
     </div>
@@ -643,7 +580,7 @@
       rate: "aacBoard.speechRate"
     };
 
-    // Browser voice selection is automatic; Android voices can be forced from the parent menu.
+    // Voice selection is automatic and hidden from the child-facing UI.
     // On the onn Android tablet, Chrome should usually expose Google/Android TTS voices.
     // These patterns prefer Google English US female-style voices first, then any clear English voice.
     const preferredVoicePatterns = [
@@ -733,75 +670,11 @@
     let firstChoice = null;
     let thenChoice = null;
     let parentHoldTimer = null;
-    let speechRequestId = 0;
-    let speakingFeedbackElement = null;
 
     function getSpeechRate() {
       const rateSelect = document.getElementById("rateSelect");
       const parsed = Number(rateSelect.value);
       return Number.isFinite(parsed) ? parsed : 0.75;
-    }
-
-    function nativeSpeechAvailable() {
-      if (typeof window.AndroidSpeech === "undefined") return false;
-      try {
-        return window.AndroidSpeech.isAvailable();
-      } catch (error) {
-        return false;
-      }
-    }
-
-    function nativeSpeechSummary() {
-      if (typeof window.AndroidSpeech === "undefined") return "";
-      try {
-        return window.AndroidSpeech.getVoiceSummary();
-      } catch (error) {
-        return "Android speech is not ready.";
-      }
-    }
-
-    function nativeEnglishVoices() {
-      if (!nativeSpeechAvailable()) return [];
-      try {
-        return JSON.parse(window.AndroidSpeech.getEnglishVoices() || "[]");
-      } catch (error) {
-        return [];
-      }
-    }
-
-    function nativeActiveVoiceName() {
-      if (!nativeSpeechAvailable()) return "";
-      try {
-        return window.AndroidSpeech.getActiveVoiceName() || "";
-      } catch (error) {
-        return "";
-      }
-    }
-
-    function addVoiceOption(select, value, label) {
-      const option = document.createElement("option");
-      option.value = value;
-      option.textContent = label;
-      select.appendChild(option);
-    }
-
-    function renderAndroidVoicePicker() {
-      const select = document.getElementById("androidVoiceSelect");
-      if (!select) return;
-
-      const nativeReady = nativeSpeechAvailable();
-      const nativeVoices = nativeReady ? nativeEnglishVoices() : [];
-      const activeName = nativeReady ? nativeActiveVoiceName() : "";
-      select.innerHTML = "";
-      addVoiceOption(select, "", nativeReady ? "Auto best Android voice" : "Android voices unavailable");
-
-      nativeVoices.forEach(voice => {
-        const type = voice.network ? "online/network" : "offline/local";
-        addVoiceOption(select, voice.name, `${voice.name} (${voice.lang || "English"}, ${type}, quality ${voice.quality})`);
-      });
-
-      select.disabled = !nativeReady || !nativeVoices.length;
-      select.value = nativeVoices.some(voice => voice.name === activeName) ? activeName : "";
     }
 
     function voiceText(voice) {
@@ -856,40 +729,16 @@
       const status = document.getElementById("voiceStatus");
       if (!status) return;
 
-      if (nativeSpeechAvailable()) {
-        status.textContent = nativeSpeechSummary() || "Using Android speech.";
-        return;
-      }
-
-      const nativeFallback = typeof window.AndroidSpeech !== "undefined"
-        ? " Android speech is not ready."
-        : "";
-
-      if (!("speechSynthesis" in window)) {
-        status.textContent = nativeFallback
-          ? `${nativeSpeechSummary()} Browser speech is not supported.`
-          : "Speech is not supported on this browser.";
-        return;
-      }
-
       if (!selectedVoice) {
-        status.textContent = `Using browser default voice.${nativeFallback}`;
+        status.textContent = "No English voice found yet. The browser will use its default voice.";
         return;
       }
 
       const type = selectedVoice.localService === false ? "online/network" : "offline/local";
-      status.textContent = `Using browser voice: ${selectedVoice.name} (${selectedVoice.lang || "English"}, ${type}).${nativeFallback}`;
+      status.textContent = `Using: ${selectedVoice.name} (${selectedVoice.lang || "English"}, ${type}). Voice selection is automatic.`;
     }
 
     function loadVoices() {
-      renderAndroidVoicePicker();
-
-      if (nativeSpeechAvailable()) {
-        selectedVoice = null;
-        updateVoiceStatus();
-        return;
-      }
-
       if (!("speechSynthesis" in window)) {
         const status = document.getElementById("voiceStatus");
         if (status) status.textContent = "Speech is not supported on this browser.";
@@ -913,19 +762,9 @@
       updateVoiceStatus();
     }
 
-    function speak(text, feedbackElement = null) {
+    function speak(text) {
       if (!text) return;
       lastPhrase = text;
-      const requestId = String(++speechRequestId);
-      showSpeakingFeedback(feedbackElement);
-
-      if (nativeSpeechAvailable()) {
-        try {
-          if (window.AndroidSpeech.speak(text, getSpeechRate(), requestId)) return;
-        } catch (error) {
-          updateVoiceStatus();
-        }
-      }
 
       if ("speechSynthesis" in window) {
         window.speechSynthesis.cancel();
@@ -935,27 +774,10 @@
         utterance.volume = 1;
         utterance.lang = selectedVoice?.lang || "en-US";
         if (selectedVoice) utterance.voice = selectedVoice;
-        utterance.onend = () => finishSpeakingFeedback(requestId);
-        utterance.onerror = () => finishSpeakingFeedback(requestId);
         window.speechSynthesis.speak(utterance);
       } else {
         alert(text);
-        finishSpeakingFeedback(requestId);
       }
-    }
-
-    function finishSpeakingFeedback(requestId) {
-      if (requestId !== String(speechRequestId)) return;
-      speakingFeedbackElement?.classList.remove("is-speaking");
-      speakingFeedbackElement = null;
-    }
-
-    window.onNativeSpeechFinished = finishSpeakingFeedback;
-
-    function showSpeakingFeedback(element) {
-      document.querySelectorAll(".is-speaking").forEach(active => active.classList.remove("is-speaking"));
-      speakingFeedbackElement = element;
-      element?.classList.add("is-speaking");
     }
 
     function makeTile(item) {
@@ -968,7 +790,7 @@
         <div class="label">${item.label}</div>
         <div class="phrase">${item.phrase || item.label}</div>
       `;
-      button.addEventListener("click", () => speak(item.phrase || item.label, button));
+      button.addEventListener("click", () => speak(item.phrase || item.label));
       return button;
     }
 
@@ -981,7 +803,7 @@
         <div class="icon">${item.icon}</div>
         <div class="label">${item.label}</div>
       `;
-      button.addEventListener("click", () => selectFirstThenChoice(item, button));
+      button.addEventListener("click", () => selectFirstThenChoice(item));
       return button;
     }
 
@@ -998,45 +820,29 @@
       `;
     }
 
-    function firstThenSentence() {
-      if (!firstChoice || !thenChoice) return "";
-      return `First ${firstChoice.phrase || firstChoice.label}, then ${thenChoice.phrase || thenChoice.label}.`;
-    }
-
-    function updateFirstThenRepeatButton() {
-      document.getElementById("repeatFirstThenBtn").disabled = !firstThenSentence();
-    }
-
-    function selectFirstThenChoice(item, feedbackElement) {
+    function selectFirstThenChoice(item) {
       if (activeFirstThenBox === "first") {
         firstChoice = item;
         renderSelected("firstSelected", firstChoice, "Pick first");
         activeFirstThenBox = "then";
         updateBoxHighlight();
-        speak(`first ${item.phrase || item.label}`, feedbackElement);
+        speak(`first ${item.phrase || item.label}`);
       } else {
         thenChoice = item;
         renderSelected("thenSelected", thenChoice, "Pick then");
         updateBoxHighlight();
-        speak(`then ${item.phrase || item.label}`, feedbackElement);
+        speak(`then ${item.phrase || item.label}`);
       }
-      updateFirstThenRepeatButton();
     }
 
     function speakFirstThenOrRepeat() {
-      const sentence = document.getElementById("firstThen").classList.contains("active") ? firstThenSentence() : "";
-      if (sentence) {
-        speak(sentence);
+      if (firstChoice && thenChoice && document.getElementById("firstThen").classList.contains("active")) {
+        speak(`First ${firstChoice.phrase || firstChoice.label}, then ${thenChoice.phrase || thenChoice.label}.`);
       } else if (lastPhrase) {
         speak(lastPhrase);
       } else {
         speak("Show me");
       }
-    }
-
-    function speakFirstThenSentence() {
-      const sentence = firstThenSentence();
-      if (sentence) speak(sentence);
     }
 
     function clearBoard() {
@@ -1047,20 +853,14 @@
       renderSelected("firstSelected", null, "Pick first");
       renderSelected("thenSelected", null, "Pick then");
       updateBoxHighlight();
-      updateFirstThenRepeatButton();
-      if (nativeSpeechAvailable()) {
-        window.AndroidSpeech.stop();
-      } else if ("speechSynthesis" in window) {
-        window.speechSynthesis.cancel();
-      }
-      showSpeakingFeedback(null);
+      if ("speechSynthesis" in window) window.speechSynthesis.cancel();
     }
 
     function updateBoxHighlight() {
       const firstBox = document.getElementById("firstBox");
       const thenBox = document.getElementById("thenBox");
-      firstBox.classList.toggle("active-target", activeFirstThenBox === "first");
-      thenBox.classList.toggle("active-target", activeFirstThenBox === "then");
+      firstBox.style.borderColor = activeFirstThenBox === "first" ? "var(--primary)" : "var(--border)";
+      thenBox.style.borderColor = activeFirstThenBox === "then" ? "var(--primary)" : "var(--border)";
     }
 
     function showPage(pageId) {
@@ -1089,11 +889,7 @@
 
     function openParentMenu() {
       document.getElementById("parentOverlay").classList.remove("hidden");
-      loadVoices();
-      try {
-        document.getElementById("buildInfo").textContent = window.AndroidSpeech.getBuildInfo();
-      } catch (error) {
-      }
+      updateVoiceStatus();
     }
 
     function closeParentMenu() {
@@ -1145,41 +941,15 @@
       });
 
       document.getElementById("speakAgainBtn").addEventListener("click", speakFirstThenOrRepeat);
-      document.getElementById("repeatFirstThenBtn").addEventListener("click", speakFirstThenSentence);
       document.getElementById("clearBtn").addEventListener("click", clearBoard);
       document.getElementById("fullscreenBtn").addEventListener("click", requestFullscreen);
-      document.getElementById("androidVoiceSelect").addEventListener("change", event => {
-        if (!nativeSpeechAvailable()) return;
-        let changed = false;
-        try {
-          changed = window.AndroidSpeech.selectVoice(event.target.value);
-        } catch (error) {
-          changed = false;
-        }
-        renderAndroidVoicePicker();
-        updateVoiceStatus();
-        if (changed) speak(event.target.value ? "Voice selected." : "Automatic voice selected.");
-      });
       document.getElementById("repickVoiceBtn").addEventListener("click", () => {
-        if (nativeSpeechAvailable()) {
-          try {
-            window.AndroidSpeech.selectVoice("");
-          } catch (error) {
-          }
-          renderAndroidVoicePicker();
-          updateVoiceStatus();
-          speak("Automatic voice selected.");
-          return;
-        }
         loadVoices();
         speak("Voice selected automatically.");
       });
 
       document.getElementById("rateSelect").addEventListener("change", () => {
         localStorage.setItem(STORAGE_KEYS.rate, document.getElementById("rateSelect").value);
-        if (nativeSpeechAvailable()) {
-          window.AndroidSpeech.setRate(getSpeechRate());
-        }
         speak("speech speed selected");
       });
 
@@ -1218,12 +988,10 @@
       loadVoices();
       if ("speechSynthesis" in window) {
         window.speechSynthesis.onvoiceschanged = loadVoices;
+        setTimeout(loadVoices, 250);
+        setTimeout(loadVoices, 1000);
       }
-      setTimeout(loadVoices, 250);
-      setTimeout(loadVoices, 1000);
-      setTimeout(loadVoices, 2500);
       updateBoxHighlight();
-      updateFirstThenRepeatButton();
     }
 
     init();
