@@ -31,7 +31,9 @@
     html,
     body {
       margin: 0;
-      min-height: 100%;
+      height: 100%;
+      min-height: 0;
+      overflow: hidden;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       background: var(--bg);
       color: var(--text);
@@ -42,6 +44,8 @@
     body {
       display: flex;
       flex-direction: column;
+      height: 100dvh;
+      max-height: 100dvh;
     }
 
     button,
@@ -60,6 +64,7 @@
       position: sticky;
       top: 0;
       z-index: 10;
+      flex: 0 0 auto;
     }
 
     .title-wrap {
@@ -113,8 +118,11 @@
 
     .small-btn:active,
     .nav-btn:active,
-    .tile:active,
-    .choice-card:active {
+    .choice-card:active,
+    .small-btn.is-touch-pressing,
+    .nav-btn.is-touch-pressing,
+    .choice-card.is-touch-pressing,
+    .first-then-box.is-touch-pressing {
       transform: scale(0.98);
     }
 
@@ -212,6 +220,7 @@
       padding: 12px 14px;
       background: #fff;
       border-bottom: 1px solid var(--border);
+      flex: 0 0 auto;
     }
 
     .nav-btn.active {
@@ -221,8 +230,10 @@
     }
 
     main {
-      padding: 18px;
-      flex: 1;
+      padding: 10px;
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow: hidden;
     }
 
     .page {
@@ -231,36 +242,67 @@
 
     .page.active {
       display: block;
+      height: 100%;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    #firstThen.active {
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
     }
 
     .grid {
       display: grid;
-      gap: 18px;
+      gap: 10px;
+      height: 100%;
+      min-height: 0;
     }
 
     .main-grid {
-      grid-template-columns: repeat(4, minmax(120px, 1fr));
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-rows: repeat(4, minmax(0, 1fr));
     }
 
     .routine-grid {
-      grid-template-columns: repeat(4, minmax(120px, 1fr));
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-rows: repeat(4, minmax(0, 1fr));
     }
 
     .tile {
-      min-height: clamp(150px, 24vh, 230px);
+      width: 100%;
+      height: 100%;
+      min-width: 0;
+      min-height: 0;
       border: 3px solid var(--border);
-      border-radius: 24px;
+      border-radius: 18px;
       background: var(--card);
       box-shadow: var(--shadow);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      gap: 4px;
       cursor: pointer;
       user-select: none;
-      padding: 16px;
+      -webkit-user-select: none;
+      touch-action: none;
+      overflow: hidden;
+      padding: 8px;
       transition: background 120ms ease, border-color 120ms ease, box-shadow 120ms ease, transform 120ms ease;
+    }
+
+    .tile > * {
+      pointer-events: none;
+    }
+
+    .tile:active,
+    .tile.is-touch-pressing {
+      transform: scale(0.985);
+      border-color: var(--primary);
+      background: var(--primary-soft);
+      box-shadow: 0 0 0 5px rgba(47, 111, 237, 0.18), var(--shadow);
     }
 
     .tile:focus-visible,
@@ -288,6 +330,12 @@
       justify-content: center;
     }
 
+    .tile .icon {
+      width: clamp(50px, 7.5vh, 72px);
+      height: clamp(50px, 7.5vh, 72px);
+      flex: 0 0 auto;
+    }
+
     .icon svg {
       width: 100%;
       height: 100%;
@@ -295,7 +343,7 @@
     }
 
     .tile .label {
-      font-size: clamp(22px, 4vw, 42px);
+      font-size: clamp(18px, 3.5vw, 28px);
       font-weight: 950;
       line-height: 1;
       letter-spacing: -0.02em;
@@ -304,7 +352,7 @@
     }
 
     .tile .phrase {
-      font-size: clamp(12px, 1.8vw, 18px);
+      font-size: clamp(11px, 1.9vw, 15px);
       color: var(--muted);
       text-align: center;
       font-weight: 750;
@@ -481,11 +529,6 @@
     }
 
     @media (orientation: portrait) {
-      .main-grid,
-      .routine-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-
       .choice-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
@@ -501,10 +544,6 @@
         flex-direction: column;
       }
 
-      .main-grid,
-      .routine-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
     }
 
     @media print {
@@ -521,10 +560,33 @@
         padding: 0;
       }
 
+      html,
+      body {
+        height: auto;
+        min-height: 100%;
+        max-height: none;
+        overflow: visible;
+      }
+
+      main,
+      #firstThen.active {
+        overflow: visible;
+      }
+
       .page {
         display: block !important;
+        height: auto !important;
         page-break-after: always;
         padding: 12px;
+      }
+
+      .grid {
+        height: auto;
+      }
+
+      .main-grid,
+      .routine-grid {
+        grid-template-rows: auto;
       }
 
       .tile,
@@ -958,6 +1020,116 @@
       element?.classList.add("is-speaking");
     }
 
+    const CHILD_TOUCH_EDGE_GUARD = 24;
+    const CHILD_TOUCH_MAX_TRAVEL = 32;
+    const TOUCH_CLICK_SUPPRESSION_MS = 750;
+
+    function bindChildPress(element, activate) {
+      const activeTouches = new Map();
+      let suppressClickUntil = 0;
+
+      function isDisabled() {
+        return element.disabled || element.getAttribute("aria-disabled") === "true";
+      }
+
+      function isInside(touch) {
+        const rect = element.getBoundingClientRect();
+        return touch.clientX >= rect.left
+          && touch.clientX <= rect.right
+          && touch.clientY >= rect.top
+          && touch.clientY <= rect.bottom;
+      }
+
+      function movedTooFar(start, touch) {
+        return Math.hypot(touch.clientX - start.x, touch.clientY - start.y) > CHILD_TOUCH_MAX_TRAVEL;
+      }
+
+      function updatePressedFeedback() {
+        const hasValidTouch = Array.from(activeTouches.values()).some(touch => !touch.ignored && !touch.cancelled);
+        element.classList.toggle("is-touch-pressing", hasValidTouch);
+      }
+
+      element.addEventListener("touchstart", event => {
+        if (isDisabled()) return;
+
+        for (const touch of event.changedTouches) {
+          const startsOnEdge = touch.clientX <= CHILD_TOUCH_EDGE_GUARD
+            || touch.clientX >= window.innerWidth - CHILD_TOUCH_EDGE_GUARD;
+          activeTouches.set(touch.identifier, {
+            x: touch.clientX,
+            y: touch.clientY,
+            ignored: startsOnEdge,
+            cancelled: false
+          });
+        }
+        updatePressedFeedback();
+      }, { passive: true });
+
+      element.addEventListener("touchmove", event => {
+        for (const touch of event.changedTouches) {
+          const start = activeTouches.get(touch.identifier);
+          if (start && !start.ignored && (movedTooFar(start, touch) || !isInside(touch))) {
+            start.cancelled = true;
+          }
+        }
+        updatePressedFeedback();
+      }, { passive: true });
+
+      element.addEventListener("touchend", event => {
+        let handledTouch = false;
+        let shouldActivate = false;
+
+        for (const touch of event.changedTouches) {
+          const start = activeTouches.get(touch.identifier);
+          activeTouches.delete(touch.identifier);
+          if (!start) continue;
+
+          handledTouch = true;
+          if (!start.ignored
+              && !start.cancelled
+              && !movedTooFar(start, touch)
+              && isInside(touch)
+              && !isDisabled()) {
+            shouldActivate = true;
+          }
+        }
+        updatePressedFeedback();
+
+        if (handledTouch) {
+          event.preventDefault();
+          suppressClickUntil = Date.now() + TOUCH_CLICK_SUPPRESSION_MS;
+        }
+        if (shouldActivate) {
+          activate();
+        }
+      }, { passive: false });
+
+      element.addEventListener("touchcancel", event => {
+        for (const touch of event.changedTouches) {
+          activeTouches.delete(touch.identifier);
+        }
+        updatePressedFeedback();
+      }, { passive: true });
+
+      element.addEventListener("click", event => {
+        if (Date.now() < suppressClickUntil && event.detail !== 0) {
+          event.preventDefault();
+          event.stopImmediatePropagation();
+          return;
+        }
+        if (!isDisabled()) activate();
+      });
+
+      if (element.tagName !== "BUTTON") {
+        element.addEventListener("keydown", event => {
+          if ((event.key === "Enter" || event.key === " ") && !isDisabled()) {
+            event.preventDefault();
+            activate();
+          }
+        });
+      }
+    }
+
     function makeTile(item) {
       const button = document.createElement("button");
       button.className = `tile ${item.className || ""}`;
@@ -968,7 +1140,7 @@
         <div class="label">${item.label}</div>
         <div class="phrase">${item.phrase || item.label}</div>
       `;
-      button.addEventListener("click", () => speak(item.phrase || item.label, button));
+      bindChildPress(button, () => speak(item.phrase || item.label, button));
       return button;
     }
 
@@ -981,7 +1153,7 @@
         <div class="icon">${item.icon}</div>
         <div class="label">${item.label}</div>
       `;
-      button.addEventListener("click", () => selectFirstThenChoice(item, button));
+      bindChildPress(button, () => selectFirstThenChoice(item, button));
       return button;
     }
 
@@ -1141,11 +1313,11 @@
       firstThenChoices.forEach(item => choiceGrid.appendChild(makeChoiceCard(item)));
 
       document.querySelectorAll(".nav-btn").forEach(button => {
-        button.addEventListener("click", () => showPage(button.dataset.page));
+        bindChildPress(button, () => showPage(button.dataset.page));
       });
 
       document.getElementById("speakAgainBtn").addEventListener("click", speakFirstThenOrRepeat);
-      document.getElementById("repeatFirstThenBtn").addEventListener("click", speakFirstThenSentence);
+      bindChildPress(document.getElementById("repeatFirstThenBtn"), speakFirstThenSentence);
       document.getElementById("clearBtn").addEventListener("click", clearBoard);
       document.getElementById("fullscreenBtn").addEventListener("click", requestFullscreen);
       document.getElementById("androidVoiceSelect").addEventListener("change", event => {
@@ -1183,34 +1355,16 @@
         speak("speech speed selected");
       });
 
-      document.getElementById("firstBox").addEventListener("click", () => {
+      bindChildPress(document.getElementById("firstBox"), () => {
         activeFirstThenBox = "first";
         updateBoxHighlight();
         speak("first");
       });
 
-      document.getElementById("thenBox").addEventListener("click", () => {
+      bindChildPress(document.getElementById("thenBox"), () => {
         activeFirstThenBox = "then";
         updateBoxHighlight();
         speak("then");
-      });
-
-      document.getElementById("firstBox").addEventListener("keydown", event => {
-        if (event.key === "Enter" || event.key === " ") {
-          event.preventDefault();
-          activeFirstThenBox = "first";
-          updateBoxHighlight();
-          speak("first");
-        }
-      });
-
-      document.getElementById("thenBox").addEventListener("keydown", event => {
-        if (event.key === "Enter" || event.key === " ") {
-          event.preventDefault();
-          activeFirstThenBox = "then";
-          updateBoxHighlight();
-          speak("then");
-        }
       });
 
       initParentHotspot();
