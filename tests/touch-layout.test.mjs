@@ -21,6 +21,8 @@ const firstThenRule = cssRule("#firstThen.active");
 
 assert.match(documentRule, /height:\s*100%/);
 assert.match(documentRule, /overflow:\s*hidden/);
+assert.match(bodyRule, /height:\s*100%;[\s\S]*height:\s*100dvh/);
+assert.match(bodyRule, /max-height:\s*100%;[\s\S]*max-height:\s*100dvh/);
 assert.match(bodyRule, /height:\s*100dvh/);
 assert.match(mainRule, /min-height:\s*0/);
 assert.match(mainRule, /overflow:\s*hidden/);

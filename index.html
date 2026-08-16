@@ -44,6 +44,9 @@
     body {
       display: flex;
       flex-direction: column;
+      /* Keep Fire OS WebViews that predate dynamic viewport units usable. */
+      height: 100%;
+      max-height: 100%;
       height: 100dvh;
       max-height: 100dvh;
     }
@@ -146,6 +149,10 @@
 
     .parent-overlay {
       position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
       inset: 0;
       background: rgba(0, 0, 0, 0.45);
       display: flex;
@@ -706,7 +713,7 @@
     };
 
     // Browser voice selection is automatic; Android voices can be forced from the parent menu.
-    // On the onn Android tablet, Chrome should usually expose Google/Android TTS voices.
+    // Native Android TTS is the primary speech path on Fire OS and other tablet WebViews.
     // These patterns prefer Google English US female-style voices first, then any clear English voice.
     const preferredVoicePatterns = [
       /google.*en.*us.*female/i,
