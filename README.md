@@ -2,15 +2,17 @@
 
 This project wraps `index.html` in a native Android WebView so it can be installed from an APK.
 
-## Release 1.3 (versionCode 4)
+## Release 1.4 (versionCode 5)
 
 This release supports the Fire HD 10 (13th generation) on Fire OS 8 / Android 11 (API 30), while retaining the onn 8-inch tablet layout and touch behavior. It adds Android 11 package visibility for the Fire tablet's native text-to-speech engine and WebView fallbacks for the full-screen board and parent menu.
 
 The app remains portrait-only by design. The Fire HD 10's 1920 x 1200, 16:10 display is handled by the responsive tablet grid without page scrolling on the Communication and Routine boards.
 
+Release 1.4 replaces the inline board drawings with 24 optimized, offline 512×512 PNG assets. Mom uses the supplied photograph; Dad uses the user-approved generic illustrated substitute.
+
 ## Edit the board
 
-Keep editing `index.html`. The Android build copies that single file into the WebView assets.
+Keep editing `index.html` and `assets/button-images/`. The Android build copies the board and its local image manifest into the WebView assets.
 
 ## Build the stable tablet APK
 

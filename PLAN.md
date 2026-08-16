@@ -18,7 +18,7 @@
 Visual assignments:
 
 - Communication: More—ASL-style fingertips meeting; Help—ASL-style supporting-hand gesture; Stop—raised red-cued palm; All done—two hands turning outward; Break—girl seated calmly; Eat—girl eating a clear meal; Drink—cup with water and straw; Bathroom—toilet; Yes—green-cued affirmative gesture; No—red-cued negative gesture.
-- Family: Mom and Dad—separate supplied photographs, identity-preserving head-and-shoulders cutouts with transparent backgrounds; no face, skin, hair, or clothing redesign.
+- Family: Mom—supplied photograph with an identity-preserving head-and-shoulders cutout. Dad—user-authorized generic illustrated father substitute matching the AAC character style.
 - Routine: Wake up—girl sitting up in bed with morning sun; Get dressed—girl pulling on a shirt; School—school building with backpack; Car—clear side-profile car; Play—girl playing with blocks; Bath—bathtub with water and bubbles; Bed—bed and pillow. Eat reuses the Communication asset.
 - First/Then additions: Home—house exterior; Clean up—girl putting toys into a bin; Shoes—pair of sneakers; Snack—apple and crackers; Outside—girl beside a tree under the sun.
 
@@ -40,7 +40,7 @@ Visual assignments:
 
 ## Assumptions
 
-- The user will supply one clear Mom photo and one clear Dad photo before final production; there is no generic fallback.
+- The user supplied Mom's photograph and later explicitly authorized a generic illustrated substitute for Dad.
 - The approved four-image proof becomes the style anchor for every remaining illustration.
 - Existing uncommitted version 1.3/Fire OS compatibility edits are preserved and extended rather than replaced.
 - Execution requires switching the writable workspace to the Simple Talking Board project or granting write access to it.

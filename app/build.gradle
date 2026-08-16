@@ -8,8 +8,8 @@ android {
         applicationId "com.simpletalkingboard.app"
         minSdk 26
         targetSdk 35
-        versionCode 4
-        versionName "1.3"
+        versionCode 5
+        versionName "1.4"
     }
 
     buildFeatures {
@@ -33,10 +33,16 @@ android {
     }
 }
 
-tasks.register("copyBoardHtml", Copy) {
-    from rootProject.file("index.html")
+tasks.register("copyBoardAssets", Copy) {
     into layout.buildDirectory.dir("generated/assets/main")
+
+    from rootProject.file("index.html")
+    from(rootProject.file("assets/button-images")) {
+        include "*.png"
+        include "manifest.json"
+        into "button-images"
+    }
 }
 
 android.sourceSets.main.assets.srcDir(layout.buildDirectory.dir("generated/assets/main"))
-preBuild.dependsOn("copyBoardHtml")
+preBuild.dependsOn("copyBoardAssets")
